@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 os.environ['_MFLOG_UNITTESTS'] = '1'
 import json
