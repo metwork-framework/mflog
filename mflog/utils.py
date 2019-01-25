@@ -204,7 +204,7 @@ def _get_custom_override_lines():
 
     """
     global CUSTOM_OVERRIDE_LINES_CACHE, CUSTOM_OVERRIDE_FILE
-    f = os.environ("MFLOG_OVERRIDE_FILE", None)
+    f = os.environ.get("MFLOG_OVERRIDE_FILE", None)
     if CUSTOM_OVERRIDE_LINES_CACHE is None or CUSTOM_OVERRIDE_FILE != f:
         lines = []
         if f is not None:
