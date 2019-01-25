@@ -3,213 +3,21 @@
 import os
 import sys
 import json
-import fnmatch
 import logging
+import logging.config
 import structlog
 
+from mflog.utils import _level_name_to_level_no, MODULE
+from mflog.processors import fltr, add_level, add_pid, add_exception_info
+from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
+    UNIT_TESTS_ADMIN
+
 LOGGING_CONFIG_SET = False
-MODULE = os.environ.get('MODULE', 'UNKNOWN')
-MFCOM_HOME = os.environ.get('MFCOM_HOME', None)
-MODULE_HOME = os.environ.get('MODULE_HOME', None)
-DEFAULT_LEVEL = os.environ.get('%s_LOG_DEFAULT_LEVEL' % MODULE, 'INFO')
 ADMIN_DEFAULT_LEVEL = os.environ.get('%s_LOG_ADMIN_DEFAULT_LEVEL' % MODULE,
                                      'WARNING')
 ADMIN_FILE = os.environ.get('%s_LOG_ADMIN_FILE' % MODULE, None)
 UNIT_TESTS_MODE = (os.environ.get('_MFLOG_UNITTESTS', '0') == '1')
-UNIT_TESTS_STDOUT = []
-UNIT_TESTS_STDERR = []
-UNIT_TESTS_ADMIN = []
-
-
-def _reset_unittests():
-    """Reset unittests."""
-    global UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_ADMIN
-    UNIT_TESTS_STDOUT.clear()
-    UNIT_TESTS_STDERR.clear()
-    UNIT_TESTS_ADMIN.clear()
-
-
-def _level_name_to_level_no(level_name):
-    """Convert level_name (debug, WARNING...) to level number.
-
-    Args:
-        level_name (string): A level name (debug, warning, info, critical
-            or errot), case insensitive.
-
-    Returns:
-        (int) Corresponding level number (in logging library).
-
-    Raises:
-        Exception: if the level in unknown.
-
-    """
-    ulevel_name = level_name.upper()
-    if ulevel_name == "DEBUG" or ulevel_name == "NOTSET":
-        return logging.DEBUG
-    elif ulevel_name == "INFO":
-        return logging.INFO
-    elif ulevel_name == "WARNING":
-        return logging.WARNING
-    elif ulevel_name == "ERROR" or ulevel_name == "EXCEPTION":
-        return logging.ERROR
-    elif ulevel_name == "CRITICAL":
-        return logging.CRITICAL
-    else:
-        raise Exception("unknown level name: %s" % level_name)
-
-
-DEFAULT_LEVEL_NO = _level_name_to_level_no(DEFAULT_LEVEL)
 ADMIN_DEFAULT_LEVEL_NO = _level_name_to_level_no(ADMIN_DEFAULT_LEVEL)
-MFCOM_OVERRIDE_LINES_CACHE = None
-MODULE_OVERRIDE_LINES_CACHE = None
-LEVEL_FROM_LOGGER_NAME_CACHE = {}
-
-
-def __file_to_lines(file_path):
-    """Read the given file_path and decode python_logging_override format.
-
-    foo.bar.* => DEBUG
-    foo.* => WARNING
-
-    Notes:
-    - lines beginning with # are ignored
-    - the left part is a read as a fnmatch pattern
-    - the right part is a case insensitive level name
-
-    Args:
-        file_path (string): The full path of the file to read.
-
-    Returns:
-        (list of couples) A list of (logger name pattern, level name).
-
-    """
-    try:
-        with open(file_path, "r") as f:
-            tmp = [x.split('=>') for x in f.readlines()]
-            lines = [(x[0].strip(), x[1].strip()) for x in tmp
-                     if len(x) == 2 and not x[0].strip().startswith('#')]
-        return lines
-    except IOError:
-        return []
-
-
-def _get_mfcom_override_lines():
-    """Read the mfcom python_logging_override.conf file (if exists).
-
-    Note: the content is cached (in memory).
-
-    Returns:
-        (list of couples) A list of (logger name pattern, level name).
-
-    """
-    global MFCOM_OVERRIDE_LINES_CACHE
-    if MFCOM_OVERRIDE_LINES_CACHE is None:
-        lines = []
-        if MFCOM_HOME:
-            lines = __file_to_lines("%s/config/python_logging_override.conf" %
-                                    MFCOM_HOME)
-        MFCOM_OVERRIDE_LINES_CACHE = lines
-    return MFCOM_OVERRIDE_LINES_CACHE
-
-
-def _get_module_override_lines():
-    """Read the current module python_logging_override.conf file (if exists).
-
-    Note: the content is cached (in memory).
-
-    Returns:
-        (list of couples) A list of (logger name pattern, level name).
-
-    """
-    global MODULE_OVERRIDE_LINES_CACHE
-    if MODULE_OVERRIDE_LINES_CACHE is None:
-        lines = []
-        if MODULE_HOME:
-            lines = __file_to_lines("%s/config/python_logging_override.conf" %
-                                    MODULE_HOME)
-        MODULE_OVERRIDE_LINES_CACHE = lines
-    return MODULE_OVERRIDE_LINES_CACHE
-
-
-def __get_level_no_from_logger_name(logger_name):
-    """Get the level number to use for the given logger name.
-
-    Note: we check first the current module python_logging_override.conf file
-        then the mfcom python_logging_override.conf file then we return
-        the default level number. The first match wins.
-
-    Args:
-        logger_name (string): The logger name.
-
-    Returns:
-        (int) The level number to use for this logger name.
-
-    """
-    module_lines = _get_module_override_lines()
-    for k, v in module_lines:
-        if fnmatch.fnmatch(logger_name, k):
-            return _level_name_to_level_no(v)
-    mfcom_lines = _get_mfcom_override_lines()
-    for k, v in mfcom_lines:
-        if fnmatch.fnmatch(logger_name, k):
-            return _level_name_to_level_no(v)
-    return DEFAULT_LEVEL_NO
-
-
-def _get_level_no_from_logger_name(logger_name):
-    """Get the level number to use for the given logger name.
-
-    Note: we check first the current module python_logging_override.conf file
-        then the mfcom python_logging_override.conf file then we return
-        the default level number. The first match wins.
-
-    Note: the result is cached in memory.
-
-    Args:
-        logger_name (string): The logger name.
-
-    Returns:
-        (int) The level number to use for this logger name.
-
-    """
-    global LEVEL_FROM_LOGGER_NAME_CACHE
-    if logger_name not in LEVEL_FROM_LOGGER_NAME_CACHE:
-        LEVEL_FROM_LOGGER_NAME_CACHE[logger_name] = \
-            __get_level_no_from_logger_name(logger_name)
-    return LEVEL_FROM_LOGGER_NAME_CACHE[logger_name]
-
-
-def fltr(logger, method_name, event_dict):
-    """Filter log messages."""
-    method_level_no = _level_name_to_level_no(method_name)
-    logger_level_no = \
-        _get_level_no_from_logger_name(event_dict.get('name', ''))
-    if method_level_no < logger_level_no:
-        raise structlog.DropEvent
-    return event_dict
-
-
-def add_level(logger, method_name, event_dict):
-    """Add the severity in the event_dict."""
-    event_dict['level'] = method_name.lower()
-    return event_dict
-
-
-def add_pid(logger, method_name, event_dict):
-    """Add the current pid in the event dict."""
-    event_dict['pid'] = os.getpid()
-    return event_dict
-
-
-def add_exception_info(logger, method_name, event_dict):
-    exc_info = event_dict.pop("exc_info", None)
-    if exc_info:
-        e = structlog.processors._figure_out_exc_info(exc_info)
-        event_dict["exception"] = structlog._frames._format_exception(e)
-        event_dict["exception_type"] = e[0].__name__
-        event_dict["exception_file"] = e[-1].tb_frame.f_code.co_filename
-        return event_dict
-    return event_dict
 
 
 class StructlogHandler(logging.Handler):
@@ -229,7 +37,7 @@ class StructlogHandler(logging.Handler):
 
     def __get_logger(self, name):
         if name not in self.__loggers:
-            self.__loggers[name] = structlog.get_logger(name)
+            self.__loggers[name] = get_logger(name)
         return self.__loggers[name]
 
     def emit(self, record):
@@ -238,15 +46,15 @@ class StructlogHandler(logging.Handler):
             kwargs['exc_info'] = record.exc_info
         logger = self.__get_logger(record.name)
         if record.levelno == logging.DEBUG:
-            logger.debug(record.msg, **kwargs)
+            logger.debug(record.msg, *(record.args), **kwargs)
         elif record.levelno == logging.INFO:
-            logger.info(record.msg, **kwargs)
+            logger.info(record.msg, *(record.args), **kwargs)
         elif record.levelno == logging.WARNING:
-            logger.warning(record.msg, **kwargs)
+            logger.warning(record.msg, *(record.args), **kwargs)
         elif record.levelno == logging.ERROR:
-            logger.error(record.msg, **kwargs)
+            logger.error(record.msg, *(record.args), **kwargs)
         elif record.levelno == logging.CRITICAL:
-            logger.critical(record.msg, **kwargs)
+            logger.critical(record.msg, *(record.args), **kwargs)
         else:
             raise Exception("unknown levelno: %i" % record.levelno)
 
@@ -374,6 +182,19 @@ def set_logging_config():
     if LOGGING_CONFIG_SET:
         return
     # Configure standard logging redirect to structlog
+    d = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {},
+        "handlers": {},
+        "filters": {},
+        "loggers": {
+            "": {
+                "level": "NOTSET"
+            }
+        }
+    }
+    logging.config.dictConfig(d)
     root_logger = logging.getLogger()
     root_logger.addHandler(StructlogHandler())
     root_logger.setLevel(logging.NOTSET)
