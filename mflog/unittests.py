@@ -11,6 +11,6 @@ UNIT_TESTS_ADMIN = []
 def _reset_unittests():
     """Reset unittests."""
     global UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_ADMIN
-    UNIT_TESTS_STDOUT.clear()
-    UNIT_TESTS_STDERR.clear()
-    UNIT_TESTS_ADMIN.clear()
+    del(UNIT_TESTS_STDOUT[:])
+    del(UNIT_TESTS_STDERR[:])
+    del(UNIT_TESTS_ADMIN[:])
