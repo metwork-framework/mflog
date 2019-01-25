@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import os
-os.environ['_MFLOG_UNITTESTS'] = '1'
+import force_unittests_mode  # noqa: F401
 import json
-
-
 from mflog import get_logger
 from mflog import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_ADMIN
-from mflog import _reset_unittests
+from mflog.unittests import reset_unittests
 import logging
 
 
@@ -35,7 +32,7 @@ def _test_admin(level, msg):
 
 
 def test_basic_warning():
-    _reset_unittests()
+    reset_unittests()
     x = get_logger()
     x.warning("foo")
     assert UNIT_TESTS_STDOUT == []
@@ -44,7 +41,7 @@ def test_basic_warning():
 
 
 def test_basic_debug():
-    _reset_unittests()
+    reset_unittests()
     x = get_logger()
     x.debug("foo")
     assert UNIT_TESTS_STDERR == []
@@ -53,7 +50,7 @@ def test_basic_debug():
 
 
 def test_basic_info():
-    _reset_unittests()
+    reset_unittests()
     x = get_logger()
     x.info("foo")
     assert UNIT_TESTS_STDERR == []
@@ -62,7 +59,7 @@ def test_basic_info():
 
 
 def test_basic_critical():
-    _reset_unittests()
+    reset_unittests()
     x = get_logger()
     x.critical("foo")
     assert UNIT_TESTS_STDOUT == []
@@ -71,7 +68,7 @@ def test_basic_critical():
 
 
 def test_basic_error():
-    _reset_unittests()
+    reset_unittests()
     x = get_logger()
     x.error("foo")
     assert UNIT_TESTS_STDOUT == []
@@ -80,7 +77,7 @@ def test_basic_error():
 
 
 def test_basic_exception():
-    _reset_unittests()
+    reset_unittests()
     x = get_logger()
     try:
         1 / 0
@@ -96,7 +93,7 @@ def test_basic_exception():
 
 
 def test_template_info():
-    _reset_unittests()
+    reset_unittests()
     x = get_logger()
     x.info("foo%s", "bar")
     assert UNIT_TESTS_STDERR == []
@@ -105,45 +102,42 @@ def test_template_info():
 
 
 def test_kv_warning():
-    _reset_unittests()
+    reset_unittests()
     x = get_logger()
     x.warning("foo", k1=1, k2="bar")
     assert UNIT_TESTS_STDOUT == []
-    _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2='bar'}")
+    _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
     tmp = _test_admin("WARNING", "foo")
     assert tmp['k1'] == 1
     assert tmp['k2'] == 'bar'
 
 
 def test_utf8():
-    _reset_unittests()
+    reset_unittests()
     x = get_logger()
-    x.warning("fooééé", k1=1, k2="barààà")
+    x.warning(u"fooééé", k1=1, k2=u"barààà")
     assert UNIT_TESTS_STDOUT == []
-    print("********************")
-    print(UNIT_TESTS_STDERR)
-    print("********************")
-    _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "fooééé", "{k1=1 k2='barààà'}")
-    tmp = _test_admin("WARNING", "fooééé")
+    _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", u"fooééé", u"{k1=1 k2=barààà}")
+    tmp = _test_admin("WARNING", u"fooééé")
     assert tmp['k1'] == 1
-    assert tmp['k2'] == 'barààà'
+    assert tmp['k2'] == u'barààà'
 
 
 def test_bind():
-    _reset_unittests()
+    reset_unittests()
     x = get_logger("foo.bar")
     x = x.bind(k1=1)
     x = x.bind(k2='bar')
     x.warning("foo")
     assert UNIT_TESTS_STDOUT == []
-    _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2='bar'}")
+    _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
     tmp = _test_admin("WARNING", "foo")
     assert tmp['k1'] == 1
     assert tmp['k2'] == 'bar'
 
 
 def test_logging1():
-    _reset_unittests()
+    reset_unittests()
     x = logging.getLogger("foo.bar")
     x.warning("foo%s", "bar")
     assert UNIT_TESTS_STDOUT == []
@@ -152,7 +146,7 @@ def test_logging1():
 
 
 def test_logging2():
-    _reset_unittests()
+    reset_unittests()
     x = logging.getLogger()
     x.info("foo")
     assert UNIT_TESTS_STDERR == []

@@ -8,7 +8,7 @@ UNIT_TESTS_STDERR = []
 UNIT_TESTS_ADMIN = []
 
 
-def _reset_unittests():
+def reset_unittests():
     """Reset unittests."""
     global UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_ADMIN
     del(UNIT_TESTS_STDOUT[:])

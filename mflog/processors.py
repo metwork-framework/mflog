@@ -36,3 +36,8 @@ def add_exception_info(logger, method_name, event_dict):
         event_dict["exception_file"] = e[-1].tb_frame.f_code.co_filename
         return event_dict
     return event_dict
+
+
+def kv_renderer(logger, method_name, event_dict):
+    ordered_items = sorted(event_dict.items())
+    return " ".join(["%s=%s" % (k, v) for k, v in ordered_items])

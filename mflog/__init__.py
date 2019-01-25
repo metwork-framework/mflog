@@ -8,7 +8,8 @@ import logging.config
 import structlog
 
 from mflog.utils import _level_name_to_level_no, MODULE
-from mflog.processors import fltr, add_level, add_pid, add_exception_info
+from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
+    kv_renderer
 from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
     UNIT_TESTS_ADMIN
 
@@ -152,8 +153,7 @@ class MFLogLogger(object):
         event_dict.pop('exception_file', None)
         extra = ""
         if len(event_dict) > 0:
-            kvr = structlog.processors.KeyValueRenderer
-            extra = " {%s}" % kvr(sort_keys=True)(None, None, event_dict)
+            extra = " {%s}" % kv_renderer(None, None, event_dict)
         tmp = "%s %10s (%s#%i) %s%s" % (ts, level, name, pid, msg, extra)
         if exc is not None:
             tmp = tmp + "\n" + exc
