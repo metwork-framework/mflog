@@ -2,14 +2,14 @@
 
 import os
 import structlog
-from mflog.utils import _level_name_to_level_no, _get_level_no_from_logger_name
+from mflog.utils import level_name_to_level_no, get_level_no_from_logger_name
 
 
 def fltr(logger, method_name, event_dict):
     """Filter log messages."""
-    method_level_no = _level_name_to_level_no(method_name)
+    method_level_no = level_name_to_level_no(method_name)
     logger_level_no = \
-        _get_level_no_from_logger_name(event_dict.get('name', ''))
+        get_level_no_from_logger_name(event_dict.get('name', ''))
     if method_level_no < logger_level_no:
         raise structlog.DropEvent
     return event_dict

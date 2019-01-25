@@ -1,24 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import os
 import sys
 import json
 import logging
 import logging.config
 import structlog
 
-from mflog.utils import _level_name_to_level_no, MODULE
+from mflog.utils import level_name_to_level_no, _get_admin_default_level_no, \
+    _get_admin_file, Config
 from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
     kv_renderer
 from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
-    UNIT_TESTS_ADMIN
-
-LOGGING_CONFIG_SET = False
-ADMIN_DEFAULT_LEVEL = os.environ.get('%s_LOG_ADMIN_DEFAULT_LEVEL' % MODULE,
-                                     'WARNING')
-ADMIN_FILE = os.environ.get('%s_LOG_ADMIN_FILE' % MODULE, None)
-UNIT_TESTS_MODE = (os.environ.get('_MFLOG_UNITTESTS', '0') == '1')
-ADMIN_DEFAULT_LEVEL_NO = _level_name_to_level_no(ADMIN_DEFAULT_LEVEL)
+    UNIT_TESTS_ADMIN, UNIT_TESTS_MODE
 
 
 class StructlogHandler(logging.Handler):
@@ -112,11 +105,11 @@ class MFLogLogger(object):
     def __init__(self):
         self._stdout_print_logger = structlog.PrintLogger(sys.stdout)
         self._stderr_print_logger = structlog.PrintLogger(sys.stderr)
-        if ADMIN_FILE or UNIT_TESTS_MODE:
+        if _get_admin_file() or UNIT_TESTS_MODE:
             if UNIT_TESTS_MODE:
                 self._admin_file = open('/dev/null', 'w+')
             else:
-                self._admin_file = open(ADMIN_FILE, 'w+')
+                self._admin_file = open(_get_admin_file(), 'w+')
             self._json_logger = structlog.PrintLogger(self._admin_file)
         if UNIT_TESTS_MODE:
             self._stdout_print_logger._flush = lambda *args, **kwargs: None
@@ -135,10 +128,10 @@ class MFLogLogger(object):
         self._stderr_print_logger.msg(self._format(event_dict))
 
     def _admin(self, **event_dict):
-        if ADMIN_FILE is None and not UNIT_TESTS_MODE:
+        if _get_admin_file() is None and not UNIT_TESTS_MODE:
             return
-        method_level_no = _level_name_to_level_no(event_dict['level'])
-        if method_level_no < ADMIN_DEFAULT_LEVEL_NO:
+        method_level_no = level_name_to_level_no(event_dict['level'])
+        if method_level_no < _get_admin_default_level_no():
             return
         self._json_logger.msg(json.dumps(event_dict))
 
@@ -172,14 +165,18 @@ class MFLogLoggerFactory(object):
         return MFLogLogger()
 
 
-def set_logging_config():
+def set_logging_config(default_level=None, json_default_level=None,
+                       json_file=None):
     """Set the logging configuration.
 
     The configuration is cached. So you can call this several times.
 
     """
-    global LOGGING_CONFIG_SET
-    if LOGGING_CONFIG_SET:
+    b = Config.set_instance(default_level=default_level,
+                            json_default_level=json_default_level,
+                            json_file=json_file)
+    if not b:
+        # config already done
         return
     # Configure standard logging redirect to structlog
     d = {
@@ -217,7 +214,6 @@ def set_logging_config():
         wrapper_class=MFLogBoundLogger,
         logger_factory=MFLogLoggerFactory()
     )
-    LOGGING_CONFIG_SET = True
 
 
 def getLogger(*args, **kwargs):
