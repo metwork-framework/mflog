@@ -86,7 +86,7 @@ x.debug("message with key/values", foo=True, bar="string")
 
 try:
     1/0
-exception Exception:
+except Exception:
     x.exception("we catched an exception with automatic traceback")
 
 x = log.bind(context1="foo")
