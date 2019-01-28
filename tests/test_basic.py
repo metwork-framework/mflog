@@ -3,7 +3,7 @@
 import force_unittests_mode  # noqa: F401
 import json
 from mflog import get_logger
-from mflog import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_ADMIN
+from mflog import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_JSON
 from mflog.unittests import reset_unittests
 import logging
 
@@ -21,9 +21,9 @@ def _test_stdxxx(stdxxx, level, msg, extra=None):
     return tmp
 
 
-def _test_admin(level, msg):
-    assert len(UNIT_TESTS_ADMIN) == 1
-    tmp = json.loads(UNIT_TESTS_ADMIN[0])
+def _test_json(level, msg):
+    assert len(UNIT_TESTS_JSON) == 1
+    tmp = json.loads(UNIT_TESTS_JSON[0])
     assert tmp["level"] == level.lower()
     assert tmp["pid"] > 0
     assert len(tmp["timestamp"]) == 27
@@ -37,7 +37,7 @@ def test_basic_warning():
     x.warning("foo")
     assert UNIT_TESTS_STDOUT == []
     _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
-    _test_admin("WARNING", "foo")
+    _test_json("WARNING", "foo")
 
 
 def test_basic_debug():
@@ -45,7 +45,7 @@ def test_basic_debug():
     x = get_logger()
     x.debug("foo")
     assert UNIT_TESTS_STDERR == []
-    assert UNIT_TESTS_ADMIN == []
+    assert UNIT_TESTS_JSON == []
     assert UNIT_TESTS_STDOUT == []
 
 
@@ -54,7 +54,7 @@ def test_basic_info():
     x = get_logger()
     x.info("foo")
     assert UNIT_TESTS_STDERR == []
-    assert UNIT_TESTS_ADMIN == []
+    assert UNIT_TESTS_JSON == []
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
 
 
@@ -64,7 +64,7 @@ def test_basic_critical():
     x.critical("foo")
     assert UNIT_TESTS_STDOUT == []
     _test_stdxxx(UNIT_TESTS_STDERR, "CRITICAL", "foo")
-    _test_admin("CRITICAL", "foo")
+    _test_json("CRITICAL", "foo")
 
 
 def test_basic_error():
@@ -73,7 +73,7 @@ def test_basic_error():
     x.error("foo")
     assert UNIT_TESTS_STDOUT == []
     _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "foo")
-    _test_admin("ERROR", "foo")
+    _test_json("ERROR", "foo")
 
 
 def test_basic_exception():
@@ -85,7 +85,7 @@ def test_basic_exception():
         x.exception("foo")
     assert UNIT_TESTS_STDOUT == []
     tmp = _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "foo")
-    tmp = _test_admin("ERROR", "foo")
+    tmp = _test_json("ERROR", "foo")
     print(tmp)
     assert len(tmp['exception']) > 10
     assert tmp['exception_type'] == 'ZeroDivisionError'
@@ -97,7 +97,7 @@ def test_template_info():
     x = get_logger()
     x.info("foo%s", "bar")
     assert UNIT_TESTS_STDERR == []
-    assert UNIT_TESTS_ADMIN == []
+    assert UNIT_TESTS_JSON == []
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foobar")
 
 
@@ -107,7 +107,7 @@ def test_kv_warning():
     x.warning("foo", k1=1, k2="bar")
     assert UNIT_TESTS_STDOUT == []
     _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
-    tmp = _test_admin("WARNING", "foo")
+    tmp = _test_json("WARNING", "foo")
     assert tmp['k1'] == 1
     assert tmp['k2'] == 'bar'
 
@@ -118,7 +118,7 @@ def test_utf8():
     x.warning(u"fooééé", k1=1, k2=u"barààà")
     assert UNIT_TESTS_STDOUT == []
     _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", u"fooééé", u"{k1=1 k2=barààà}")
-    tmp = _test_admin("WARNING", u"fooééé")
+    tmp = _test_json("WARNING", u"fooééé")
     assert tmp['k1'] == 1
     assert tmp['k2'] == u'barààà'
 
@@ -131,7 +131,7 @@ def test_bind():
     x.warning("foo")
     assert UNIT_TESTS_STDOUT == []
     _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
-    tmp = _test_admin("WARNING", "foo")
+    tmp = _test_json("WARNING", "foo")
     assert tmp['k1'] == 1
     assert tmp['k2'] == 'bar'
 
@@ -142,7 +142,7 @@ def test_logging1():
     x.warning("foo%s", "bar")
     assert UNIT_TESTS_STDOUT == []
     _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foobar")
-    _test_admin("WARNING", "foobar")
+    _test_json("WARNING", "foobar")
 
 
 def test_logging2():
@@ -150,5 +150,5 @@ def test_logging2():
     x = logging.getLogger()
     x.info("foo")
     assert UNIT_TESTS_STDERR == []
-    assert UNIT_TESTS_ADMIN == []
+    assert UNIT_TESTS_JSON == []
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")

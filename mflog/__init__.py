@@ -6,12 +6,11 @@ import logging
 import logging.config
 import structlog
 
-from mflog.utils import level_name_to_level_no, _get_admin_default_level_no, \
-    _get_admin_file, Config
+from mflog.utils import level_name_to_level_no, Config
 from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
     kv_renderer
 from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
-    UNIT_TESTS_ADMIN, UNIT_TESTS_MODE
+    UNIT_TESTS_JSON, UNIT_TESTS_MODE
 
 
 class StructlogHandler(logging.Handler):
@@ -97,41 +96,41 @@ class MFLogLogger(object):
 
     _stdout_print_logger = None
     _stderr_print_logger = None
-    _admin_file = None
+    _json_file = None
     _unittests_stdout = None
     _unittests_stderr = None
-    _unittests_admin = None
+    _unittests_json = None
 
     def __init__(self):
         self._stdout_print_logger = structlog.PrintLogger(sys.stdout)
         self._stderr_print_logger = structlog.PrintLogger(sys.stderr)
-        if _get_admin_file() or UNIT_TESTS_MODE:
+        if Config.json_file or UNIT_TESTS_MODE:
             if UNIT_TESTS_MODE:
-                self._admin_file = open('/dev/null', 'w+')
+                self._json_file = open('/dev/null', 'w+')
             else:
-                self._admin_file = open(_get_admin_file(), 'w+')
-            self._json_logger = structlog.PrintLogger(self._admin_file)
+                self._json_file = open(Config.json_file, 'w+')
+            self._json_logger = structlog.PrintLogger(self._json_file)
         if UNIT_TESTS_MODE:
             self._stdout_print_logger._flush = lambda *args, **kwargs: None
             self._stdout_print_logger._write = UNIT_TESTS_STDOUT.append
             self._stderr_print_logger._flush = lambda *args, **kwargs: None
             self._stderr_print_logger._write = UNIT_TESTS_STDERR.append
             self._json_logger._flush = lambda *args, **kwargs: None
-            self._json_logger._write = UNIT_TESTS_ADMIN.append
+            self._json_logger._write = UNIT_TESTS_JSON.append
 
     def _msg_stdout(self, **event_dict):
-        self._admin(**event_dict)
+        self._json(**event_dict)
         self._stdout_print_logger.msg(self._format(event_dict))
 
     def _msg_stderr(self, **event_dict):
-        self._admin(**event_dict)
+        self._json(**event_dict)
         self._stderr_print_logger.msg(self._format(event_dict))
 
-    def _admin(self, **event_dict):
-        if _get_admin_file() is None and not UNIT_TESTS_MODE:
+    def _json(self, **event_dict):
+        if Config.json_file is None and not UNIT_TESTS_MODE:
             return
         method_level_no = level_name_to_level_no(event_dict['level'])
-        if method_level_no < _get_admin_default_level_no():
+        if method_level_no < level_name_to_level_no(Config.json_minimal_level):
             return
         self._json_logger.msg(json.dumps(event_dict))
 
@@ -165,16 +164,17 @@ class MFLogLoggerFactory(object):
         return MFLogLogger()
 
 
-def set_logging_config(default_level=None, json_default_level=None,
-                       json_file=None):
+def set_logging_config(minimal_level=None, json_minimal_level=None,
+                       json_file=None, override_files=None):
     """Set the logging configuration.
 
     The configuration is cached. So you can call this several times.
 
     """
-    b = Config.set_instance(default_level=default_level,
-                            json_default_level=json_default_level,
-                            json_file=json_file)
+    b = Config.set_instance(minimal_level=minimal_level,
+                            json_minimal_level=json_minimal_level,
+                            json_file=json_file,
+                            override_files=override_files)
     if not b:
         # config already done
         return
