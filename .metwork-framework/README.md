@@ -78,7 +78,7 @@ x.debug("message with key/values", foo=True, bar="string")
 
 try:
     1/0
-exception Exception:
+except Exception:
     x.exception("we catched an exception with automatic traceback")
 
 x = log.bind(context1="foo")
@@ -179,3 +179,58 @@ In a MetWork context, this is already configured and you can use:
 - `{MODULE_RUNTIME_HOME}/config/mflog_override.conf`
 - `{MODULE_HOME}/config/mflog_override.conf`
 - `{MODULE_HOME}/config/mfcom_override.conf`
+
+## Link with standard python logging library
+
+When you get a `mflog` logger or when you call `set_logging_config()` function,
+the standard python `logging` library is reconfigured to use `mflog`.
+
+Example:
+
+```python
+import logging
+import mflog
+
+# standard use of logging library
+x = logging.getLogger("standard.logger")
+print("<output of the standard logging library>")
+x.warning("foo bar")
+print("</output of the standard logging library>")
+
+# we set the mflog configuration
+mflog.set_logging_config()
+
+# now logging library use mflog
+print()
+print("<output of the standard logging library through mflog>")
+x.warning("foo bar")
+print("</output of the standard logging library through mflog>")
+```
+
+Output:
+
+```
+<output of the standard logging library>
+foo bar
+</output of the standard logging library>
+
+<output of the standard logging library through mflog>
+2019-01-29T09:32:37.093240Z  [WARNING] (standard.logger#15809) foo bar
+</output of the standard logging library through mflog>
+```
+
+## Use UTF8 and bytes strings
+
+FIXME
+
+## Use inside libraries
+
+FIXME
+
+## mflog loggers API
+
+FIXME
+
+## Thread Local Context mode
+
+FIXME
