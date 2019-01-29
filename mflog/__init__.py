@@ -164,8 +164,9 @@ class MFLogLoggerFactory(object):
         return MFLogLogger()
 
 
-def set_logging_config(minimal_level=None, json_minimal_level=None,
-                       json_file=None, override_files=None):
+def set_config(minimal_level=None, json_minimal_level=None,
+               json_file=None, override_files=None,
+               thread_local_context=False):
     """Set the logging configuration.
 
     The configuration is cached. So you can call this several times.
@@ -197,6 +198,9 @@ def set_logging_config(minimal_level=None, json_minimal_level=None,
     root_logger.setLevel(logging.NOTSET)
 
     # Configure structlog
+    context_class = None
+    if thread_local_context:
+        context_class = structlog.threadlocal.wrap_dict(dict)
     structlog.configure(
         processors=[
             fltr,
@@ -212,6 +216,7 @@ def set_logging_config(minimal_level=None, json_minimal_level=None,
         ],
         cache_logger_on_first_use=True,
         wrapper_class=MFLogBoundLogger,
+        context_class=context_class,
         logger_factory=MFLogLoggerFactory()
     )
 
@@ -225,7 +230,7 @@ def getLogger(*args, **kwargs):
     or structlog.get_logger),
     you are sure that the logging config is set.
     """
-    set_logging_config()
+    set_config()
     if len(args) == 1:
         return structlog.get_logger(name=args[0], **kwargs)
     else:

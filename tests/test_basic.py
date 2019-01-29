@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import pytest
+import sys
+
 import force_unittests_mode  # noqa: F401
 import json
-from mflog import get_logger
+from mflog import get_logger, set_config
 from mflog import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_JSON
 from mflog.unittests import reset_unittests
 import logging
@@ -123,6 +126,18 @@ def test_utf8():
     assert tmp['k2'] == u'barààà'
 
 
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="requires python3")
+def test_bytes():
+    reset_unittests()
+    x = get_logger()
+    x.warning(b"foo", k1=1, k2=b"bar")
+    assert UNIT_TESTS_STDOUT == []
+    _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
+    tmp = _test_json("WARNING", "foo")
+    assert tmp['k1'] == 1
+    assert tmp['k2'] == 'bar'
+
+
 def test_bind():
     reset_unittests()
     x = get_logger("foo.bar")
@@ -152,3 +167,15 @@ def test_logging2():
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
+
+
+def test_thread_local_context():
+    reset_unittests()
+    set_config(thread_local_context=True)
+    x = logging.getLogger()
+    x.info("foo")
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
+    # FIXME: real test
+    set_config()
