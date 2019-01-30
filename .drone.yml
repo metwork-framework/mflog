@@ -4,6 +4,7 @@ pipeline:
     commands:
       - make test
       - make coverage
+    secrets: [ codecov_token ]
 
 matrix:
   PYTHON_VERSION:
