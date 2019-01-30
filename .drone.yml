@@ -4,6 +4,7 @@ pipeline:
     commands:
       - make test
       - make coverage
+      - if test ${PYTHON_VERSION} = "3.6-jessie"; then make codecov; fi
     secrets: [ codecov_token ]
 
 matrix:
