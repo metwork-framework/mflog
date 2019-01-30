@@ -55,7 +55,7 @@ On `json output file`, you will get:
 }
 ```
 
-## (opinionated) Choices
+## (opinionated) Choices and Features
 
 - we use main ideas from `structlog` library
 - we log `[DEBUG]` and `[INFO]` messages on `stdout` (in a human friendly way)
@@ -63,7 +63,7 @@ On `json output file`, you will get:
 - (and) we log all messages (worse than a minimal configurable level) in a configurable file in `JSON` (for easy automatic parsing)
 - we can configure a global minimal level to ignore all messages below
 - we reconfigure automatically python standard logging library to use `mflog`
-- UTF-8 messages are ok
+- Unicode and Bytes messages are supported (in Python2 and Python3)
 - good support for exceptions (with backtrace)
 
 ## How to use ?
@@ -86,7 +86,7 @@ x.debug("message with key/values", foo=True, bar="string")
 
 try:
     1/0
-exception Exception:
+except Exception:
     x.exception("we catched an exception with automatic traceback")
 
 x = log.bind(context1="foo")
@@ -102,8 +102,8 @@ x.info("this is a contexted message", extra_var=123)
 import mflog
 
 # Configure
-mflog.set_logging_config(minimal_level="DEBUG", json_minimal_level="WARNING",
-                         json_file="/foo/bar/my_output.json")
+mflog.set_config(minimal_level="DEBUG", json_minimal_level="WARNING",
+                 json_file="/foo/bar/my_output.json")
 
 # Get a logger
 x = mflog.get_logger("foo.bar")
@@ -187,6 +187,117 @@ In a MetWork context, this is already configured and you can use:
 - `{MODULE_RUNTIME_HOME}/config/mflog_override.conf`
 - `{MODULE_HOME}/config/mflog_override.conf`
 - `{MODULE_HOME}/config/mfcom_override.conf`
+
+## Link with standard python logging library
+
+When you get a `mflog` logger or when you call `set_config()` function,
+the standard python `logging` library is reconfigured to use `mflog`.
+
+Example:
+
+```python
+import logging
+import mflog
+
+# standard use of logging library
+x = logging.getLogger("standard.logger")
+print("<output of the standard logging library>")
+x.warning("foo bar")
+print("</output of the standard logging library>")
+
+# we set the mflog configuration
+mflog.set_config()
+
+# now logging library use mflog
+print()
+print("<output of the standard logging library through mflog>")
+x.warning("foo bar")
+print("</output of the standard logging library through mflog>")
+```
+
+Output:
+
+```
+<output of the standard logging library>
+foo bar
+</output of the standard logging library>
+
+<output of the standard logging library through mflog>
+2019-01-29T09:32:37.093240Z  [WARNING] (standard.logger#15809) foo bar
+</output of the standard logging library through mflog>
+```
+
+## mflog loggers API
+
+### `.debug(message, *args, **kwargs)`
+
+Log the given message as `[DEBUG]`.
+
+- `*args` can be used for placeholders (to format the given message)
+- `**kwargs` can be used for key/values (log context).
+
+Examples:
+
+```python
+from mflog import get_logger
+
+x = get_logger('my.logger')
+x.debug("my debug message with placeholders: %s and %i", "foo", 123,
+        key1="value1, key2=True, key5=123)
+```
+
+### `.info(message, *args, **kwargs)`
+
+Same as `.debug` but with `[INFO]` severity level.
+
+### `.warning(message, *args, **kwargs)`
+
+Same as `.debug` but with `[WARNING]` severity level.
+
+### `.error(message, *args, **kwargs)`
+
+Same as `.debug` but with `[ERROR]` severity level.
+
+### `.critical(message, *args, **kwargs)`
+
+Same as `.debug` but with `[CRITICAL]` severity level.
+
+### `.exception(message, *args, **kwargs)`
+
+Same as `.error` (so with `[ERROR]` severity level) but we automatically add
+the current stacktrace in the message through special key/values.
+
+### `.bind(**new_values)`
+
+Return a new logger with `**new_values` added to the existing ones
+(see examples at the beginning).
+
+### `.unbind(*keys)`
+
+Return a new logger with `*keys` removed from the context.
+It raises `KeyError` if the key is not part of the context.
+
+### `.try_unbind(*keys)`
+
+Like `.unbind` but best effort:  missing keys are ignored.
+
+## FAQ
+
+## If I want to use mflog inside my library ?
+
+If you write a library and if you want to use `mflog`, use `mflog` normally.
+You just should avoid to call `set_config()` inside your library.
+
+
+## Do you have "thread local context mode" ?
+
+This mode is explained [here](https://www.structlog.org/en/stable/thread-local.html).
+
+You have to understand what you are doing.
+
+If you want to use it, just add `thread_local_context=True` to your `set_config()`
+call. And you can use `.new(**new_values)` on mflog loggers to clear context
+and binds some initial values.
 
 
 
