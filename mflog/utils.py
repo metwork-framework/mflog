@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-import six
 import fnmatch
 import logging
-import hashlib
 
 OVERRIDE_LINES_CACHE = None
 LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -28,14 +26,14 @@ class classproperty(object):
 class Config(object):
 
     _instance = None
-    _instance_hash = None
     _minimal_level = None
     _json_minimal_level = None
     _json_file = None
     _override_files = None
 
     def __init__(self, minimal_level=None, json_minimal_level=None,
-                 json_file=None, override_files=None):
+                 json_file=None, override_files=None,
+                 thread_local_context=False):
         global LEVEL_FROM_LOGGER_NAME_CACHE, OVERRIDE_LINES_CACHE
         OVERRIDE_LINES_CACHE = {}
         LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -88,16 +86,7 @@ class Config(object):
 
     @classmethod
     def set_instance(cls, *args, **kwargs):
-        key = str(args + tuple(sorted(kwargs.items())))
-        if six.PY2:
-            h = hashlib.md5(key).hexdigest
-        else:
-            h = hashlib.md5(key.encode('utf8')).hexdigest()
-        if cls._instance_hash == h:
-            return False
         cls._instance = Config(*args, **kwargs)
-        cls._instance_hash = h
-        return True
 
     @classproperty
     def minimal_level(cls):  # pylint: disable=E0213

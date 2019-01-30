@@ -12,6 +12,8 @@ from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
 from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
     UNIT_TESTS_JSON, UNIT_TESTS_MODE
 
+CONFIGURATION_SET = False
+
 
 class StructlogHandler(logging.Handler):
     """Feed all events back into `structlog`.
@@ -172,13 +174,12 @@ def set_config(minimal_level=None, json_minimal_level=None,
     The configuration is cached. So you can call this several times.
 
     """
-    b = Config.set_instance(minimal_level=minimal_level,
-                            json_minimal_level=json_minimal_level,
-                            json_file=json_file,
-                            override_files=override_files)
-    if not b:
-        # config already done
-        return
+    global CONFIGURATION_SET
+    Config.set_instance(minimal_level=minimal_level,
+                        json_minimal_level=json_minimal_level,
+                        json_file=json_file,
+                        override_files=override_files,
+                        thread_local_context=thread_local_context)
     # Configure standard logging redirect to structlog
     d = {
         "version": 1,
@@ -201,6 +202,7 @@ def set_config(minimal_level=None, json_minimal_level=None,
     context_class = None
     if thread_local_context:
         context_class = structlog.threadlocal.wrap_dict(dict)
+    structlog.reset_defaults()
     structlog.configure(
         processors=[
             fltr,
@@ -219,9 +221,10 @@ def set_config(minimal_level=None, json_minimal_level=None,
         context_class=context_class,
         logger_factory=MFLogLoggerFactory()
     )
+    CONFIGURATION_SET = True
 
 
-def getLogger(*args, **kwargs):
+def getLogger(logger_name=None):
     """Return a python logging logger.
 
     This function is just a wrapper.
@@ -230,14 +233,12 @@ def getLogger(*args, **kwargs):
     or structlog.get_logger),
     you are sure that the logging config is set.
     """
-    set_config()
-    if len(args) == 1:
-        return structlog.get_logger(name=args[0], **kwargs)
-    else:
-        return structlog.get_logger(**kwargs)
+    if not CONFIGURATION_SET:
+        set_config()
+    return structlog.get_logger(logger_name)
 
 
-def get_logger(*args, **kwargs):
+def get_logger(logger_name=None):
     """Return a python logging logger.
 
     This function is just a wrapper.
@@ -246,4 +247,4 @@ def get_logger(*args, **kwargs):
     or structlog.get_logger),
     you are sure that the logging config is set.
     """
-    return getLogger(*args, **kwargs)
+    return getLogger(logger_name)

@@ -89,7 +89,6 @@ def test_basic_exception():
     assert UNIT_TESTS_STDOUT == []
     tmp = _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "foo")
     tmp = _test_json("ERROR", "foo")
-    print(tmp)
     assert len(tmp['exception']) > 10
     assert tmp['exception_type'] == 'ZeroDivisionError'
     assert tmp['exception_file'] == __file__
@@ -171,11 +170,27 @@ def test_logging2():
 
 def test_thread_local_context():
     reset_unittests()
+    print("plop")
     set_config(thread_local_context=True)
-    x = logging.getLogger()
-    x.info("foo")
+    print("/plop")
+    x = get_logger("foo.bar")
+    x = x.bind(k1=1, k2="bar")
+    x.info("foo", k1=2, k3=2)
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
-    # FIXME: real test
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
+    reset_unittests()
+    y = get_logger("foo.bar2")
+    y.info("foo", k1=2, k3=2)
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
+    print("plip")
     set_config()
+    print("/plip")
+    reset_unittests()
+    z = get_logger()
+    z.info("foo", k1=2, k3=2)
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k3=2}")
