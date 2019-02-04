@@ -72,11 +72,12 @@ class Config(object):
                         "MFLOG_MINIMAL_LEVEL_OVERRIDE_FILES", None).split(';')]
             else:
                 # metwork mode
-                self._override_files = [
-                    "%s/config/mflog_override.conf" % MODULE_RUNTIME_HOME,
-                    "%s/config/mflog_override.conf" % MODULE_HOME,
-                    "%s/config/mflog_override.conf" % MFCOM_HOME
-                ]
+                self._override_files = []
+                for env in MODULE_RUNTIME_HOME, MODULE_HOME, MFCOM_HOME:
+                    if env:
+                        self._override_files.append(
+                            "%s/config/mflog_override.conf" % env
+                        )
 
     @classmethod
     def get_instance(cls):
