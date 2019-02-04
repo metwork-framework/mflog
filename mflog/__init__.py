@@ -108,9 +108,9 @@ class MFLogLogger(object):
         self._stderr_print_logger = structlog.PrintLogger(sys.stderr)
         if Config.json_file or UNIT_TESTS_MODE:
             if UNIT_TESTS_MODE:
-                self._json_file = open('/dev/null', 'w+')
+                self._json_file = open('/dev/null', 'a')
             else:
-                self._json_file = open(Config.json_file, 'w+')
+                self._json_file = open(Config.json_file, 'a')
             self._json_logger = structlog.PrintLogger(self._json_file)
         if UNIT_TESTS_MODE:
             self._stdout_print_logger._flush = lambda *args, **kwargs: None
