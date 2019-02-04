@@ -61,6 +61,16 @@ def test_basic_info():
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
 
 
+def test_logger_name():
+    reset_unittests()
+    x = get_logger("foo.bar")
+    x.info("test")
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "test")
+    assert "foo.bar" in UNIT_TESTS_STDOUT[0]
+
+
 def test_basic_critical():
     reset_unittests()
     x = get_logger()
@@ -170,9 +180,7 @@ def test_logging2():
 
 def test_thread_local_context():
     reset_unittests()
-    print("plop")
     set_config(thread_local_context=True)
-    print("/plop")
     x = get_logger("foo.bar")
     x = x.bind(k1=1, k2="bar")
     x.info("foo", k1=2, k3=2)
@@ -185,9 +193,7 @@ def test_thread_local_context():
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
-    print("plip")
     set_config()
-    print("/plip")
     reset_unittests()
     z = get_logger()
     z.info("foo", k1=2, k3=2)

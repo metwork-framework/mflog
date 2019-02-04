@@ -224,7 +224,7 @@ def set_config(minimal_level=None, json_minimal_level=None,
     CONFIGURATION_SET = True
 
 
-def getLogger(logger_name=None):
+def getLogger(logger_name='root'):
     """Return a python logging logger.
 
     This function is just a wrapper.
@@ -235,10 +235,10 @@ def getLogger(logger_name=None):
     """
     if not CONFIGURATION_SET:
         set_config()
-    return structlog.get_logger(logger_name)
+    return structlog.get_logger(name=logger_name)
 
 
-def get_logger(logger_name=None):
+def get_logger(logger_name='root'):
     """Return a python logging logger.
 
     This function is just a wrapper.
