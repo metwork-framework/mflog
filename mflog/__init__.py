@@ -54,46 +54,6 @@ class StructlogHandler(logging.Handler):
             raise Exception("unknown levelno: %i" % record.levelno)
 
 
-class MFLogBoundLogger(structlog.BoundLoggerBase):
-
-    def debug(self, event=None, *args, **kw):
-        return self._proxy_to_logger("debug", event, *args, **kw)
-
-    def info(self, event=None, *args, **kw):
-        return self._proxy_to_logger("info", event, *args, **kw)
-
-    def warning(self, event=None, *args, **kw):
-        return self._proxy_to_logger("warning", event, *args, **kw)
-
-    def critical(self, event=None, *args, **kw):
-        return self._proxy_to_logger("critical", event, *args, **kw)
-
-    def error(self, event=None, *args, **kw):
-        return self._proxy_to_logger("error", event, *args, **kw)
-
-    def exception(self, event=None, *args, **kw):
-        kw.setdefault("exc_info", True)
-        return self.error(event, *args, **kw)
-
-    def _proxy_to_logger(self, method_name, event, *event_args, **event_kw):
-        """
-        Propagate a method call to the wrapped logger.
-
-        This is the same as the superclass implementation, except that
-        it also preserves positional arguments in the `event_dict` so
-        that the stdblib's support for format strings can be used.
-        """
-        if event_args:
-            event_kw["positional_args"] = event_args
-        return super(MFLogBoundLogger, self)._proxy_to_logger(method_name,
-                                                              event=event,
-                                                              **event_kw)
-
-    warn = warning
-    fatal = critical
-    msg = info
-
-
 class MFLogLogger(object):
 
     _stdout_print_logger = None
@@ -217,7 +177,7 @@ def set_config(minimal_level=None, json_minimal_level=None,
             lambda _, __, ed: ed
         ],
         cache_logger_on_first_use=True,
-        wrapper_class=MFLogBoundLogger,
+        wrapper_class=structlog.stdlib.BoundLogger,
         context_class=context_class,
         logger_factory=MFLogLoggerFactory()
     )
