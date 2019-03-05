@@ -34,6 +34,12 @@ def add_exception_info(logger, method_name, event_dict):
         event_dict["exception"] = structlog._frames._format_exception(e)
         event_dict["exception_type"] = e[0].__name__
         event_dict["exception_file"] = e[-1].tb_frame.f_code.co_filename
+        event = event_dict.get("event", "")
+        if isinstance(event, Exception):
+            # see issue #3
+            # => we convert the exception object in string to avoid
+            #    json serializing issues
+            event_dict["event"] = str(event)
         return event_dict
     return event_dict
 

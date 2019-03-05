@@ -13,15 +13,18 @@ import logging
 
 def _test_stdxxx(stdxxx, level, msg, extra=None):
     assert len(stdxxx) == 1
-    tmp = stdxxx[0].split("\n")[0].split()
+    tmp = stdxxx[0].split("\n")[0].split(maxsplit=3)
     assert len(tmp) >= 4
     assert len(tmp[0]) == 27
     assert tmp[1] == "[%s]" % level.upper()
-    assert tmp[3] == msg
+    assert tmp[3].split(' {')[0] == msg
     if extra is not None:
-        assert len(tmp) > 4
-        assert " ".join(tmp[4:]) == extra
-    return tmp
+        tmp2 = tmp[3].split(' {', 2)
+        if len(tmp2) > 1:
+            tmp3 = "{" + tmp2[1]
+        else:
+            tmp3 = tmp2
+        assert tmp3 == extra
 
 
 def _test_json(level, msg):
@@ -97,8 +100,23 @@ def test_basic_exception():
     except Exception:
         x.exception("foo")
     assert UNIT_TESTS_STDOUT == []
-    tmp = _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "foo")
+    _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "foo")
     tmp = _test_json("ERROR", "foo")
+    assert len(tmp['exception']) > 10
+    assert tmp['exception_type'] == 'ZeroDivisionError'
+    assert tmp['exception_file'] == __file__
+
+
+def test_issue3():
+    reset_unittests()
+    x = get_logger()
+    try:
+        1 / 0
+    except Exception as e:
+        x.exception(e)
+    assert UNIT_TESTS_STDOUT == []
+    _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "division by zero")
+    tmp = _test_json("ERROR", "division by zero")
     assert len(tmp['exception']) > 10
     assert tmp['exception_type'] == 'ZeroDivisionError'
     assert tmp['exception_file'] == __file__
