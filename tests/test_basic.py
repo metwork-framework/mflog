@@ -9,11 +9,12 @@ from mflog import get_logger, set_config
 from mflog import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_JSON
 from mflog.unittests import reset_unittests
 import logging
+import six
 
 
 def _test_stdxxx(stdxxx, level, msg, extra=None):
     assert len(stdxxx) == 1
-    tmp = stdxxx[0].split("\n")[0].split(maxsplit=3)
+    tmp = stdxxx[0].split("\n")[0].split(None, 3)
     assert len(tmp) >= 4
     assert len(tmp[0]) == 27
     assert tmp[1] == "[%s]" % level.upper()
@@ -115,8 +116,13 @@ def test_issue3():
     except Exception as e:
         x.exception(e)
     assert UNIT_TESTS_STDOUT == []
-    _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "division by zero")
-    tmp = _test_json("ERROR", "division by zero")
+    if six.PY2:
+        _test_stdxxx(UNIT_TESTS_STDERR, "ERROR",
+                     "integer division or modulo by zero")
+        tmp = _test_json("ERROR", "integer division or modulo by zero")
+    else:
+        _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "division by zero")
+        tmp = _test_json("ERROR", "division by zero")
     assert len(tmp['exception']) > 10
     assert tmp['exception_type'] == 'ZeroDivisionError'
     assert tmp['exception_file'] == __file__
