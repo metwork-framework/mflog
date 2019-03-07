@@ -6,7 +6,8 @@ import logging
 import logging.config
 import structlog
 
-from mflog.utils import level_name_to_level_no, Config
+from mflog.utils import level_name_to_level_no, Config, \
+    get_level_no_from_logger_name
 from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
     kv_renderer
 from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
@@ -62,8 +63,13 @@ class MFLogLogger(object):
     _unittests_stdout = None
     _unittests_stderr = None
     _unittests_json = None
+    name = None
 
-    def __init__(self):
+    def __init__(self, *args):
+        if len(args) > 0:
+            self.name = args[0]
+        else:
+            self.name = 'root'
         self._stdout_print_logger = structlog.PrintLogger(sys.stdout)
         self._stderr_print_logger = structlog.PrintLogger(sys.stderr)
         if Config.json_file or UNIT_TESTS_MODE:
@@ -116,6 +122,17 @@ class MFLogLogger(object):
     def _json_format(self, event_dict):
         return json.dumps(event_dict)
 
+    def isEnabledFor(self, level):
+        logger_level_no = \
+            get_level_no_from_logger_name(self.name)
+        return level >= logger_level_no
+
+    def getEffectiveLevel(self):
+        return get_level_no_from_logger_name(self.name)
+
+    def setLevel(self, level):
+        pass
+
     debug = info = msg = _msg_stdout
     error = critical = warning = exception = _msg_stderr
 
@@ -123,7 +140,7 @@ class MFLogLogger(object):
 class MFLogLoggerFactory(object):
 
     def __call__(self, *args):
-        return MFLogLogger()
+        return MFLogLogger(*args)
 
 
 def set_config(minimal_level=None, json_minimal_level=None,
@@ -195,7 +212,7 @@ def getLogger(logger_name='root'):
     """
     if not CONFIGURATION_SET:
         set_config()
-    return structlog.get_logger(name=logger_name)
+    return structlog.get_logger(logger_name, name=logger_name)
 
 
 def get_logger(logger_name='root'):

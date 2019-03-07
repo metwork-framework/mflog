@@ -47,6 +47,15 @@ def test_basic_warning():
     _test_json("WARNING", "foo")
 
 
+def test_basic_log():
+    reset_unittests()
+    x = get_logger()
+    x.log(logging.WARNING, "foo")
+    assert UNIT_TESTS_STDOUT == []
+    _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
+    _test_json("WARNING", "foo")
+
+
 def test_basic_debug():
     reset_unittests()
     x = get_logger()
@@ -224,3 +233,11 @@ def test_thread_local_context():
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k3=2}")
+
+
+def test_is_enabled_for():
+    reset_unittests()
+    x = get_logger("foo.bar")
+    assert x.isEnabledFor(40)
+    assert x.getEffectiveLevel() == 20
+    reset_unittests()
