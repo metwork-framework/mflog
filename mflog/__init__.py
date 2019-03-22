@@ -73,7 +73,7 @@ class MFLogLogger(object):
         self._stdout_print_logger = structlog.PrintLogger(sys.stdout)
         self._stderr_print_logger = structlog.PrintLogger(sys.stderr)
         if Config.json_file or UNIT_TESTS_MODE:
-            if UNIT_TESTS_MODE:
+            if UNIT_TESTS_MODE or Config.json_file is None:
                 self._json_file = open('/dev/null', 'a')
             else:
                 self._json_file = open(Config.json_file, 'a')
