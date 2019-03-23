@@ -9,5 +9,6 @@
 - isEnabledFor() and getEffectiveLevel() are now working
 - json file was not opened in append mode
 - logger names were not logged
+- null files was created in some directories
 - we can now give an exception object to "exception() method"
 
