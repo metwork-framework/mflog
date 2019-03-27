@@ -63,6 +63,8 @@ class Config(object):
                 # metwork mode
                 self._json_file = os.environ.get('%s_LOG_JSON_FILE' % MODULE,
                                                  None)
+            if self._json_file == "null":
+                self._json_file = None
         if override_files is not None:
             self._override_files = override_files
         else:
