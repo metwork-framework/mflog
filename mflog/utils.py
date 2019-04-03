@@ -3,6 +3,7 @@
 import os
 import fnmatch
 import logging
+import fcntl
 
 OVERRIDE_LINES_CACHE = None
 LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -12,6 +13,16 @@ MFCOM_HOME = os.environ.get('MFCOM_HOME', None)
 MODULE_HOME = os.environ.get('MODULE_HOME', None)
 MODULE_RUNTIME_HOME = os.environ.get('MODULE_RUNTIME_HOME', None)
 MODULE = os.environ.get('MODULE', 'UNKNOWN')
+
+
+def write_with_lock(f, message):
+    fcntl.flock(f, fcntl.LOCK_EX)
+    f.write(message)
+
+
+def flush_with_lock(f):
+    f.flush()
+    fcntl.flock(f, fcntl.LOCK_UN)
 
 
 class classproperty(object):

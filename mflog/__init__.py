@@ -5,9 +5,10 @@ import json
 import logging
 import logging.config
 import structlog
+import functools
 
 from mflog.utils import level_name_to_level_no, Config, \
-    get_level_no_from_logger_name
+    get_level_no_from_logger_name, write_with_lock, flush_with_lock
 from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
     kv_renderer
 from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
@@ -75,9 +76,14 @@ class MFLogLogger(object):
         if Config.json_file or UNIT_TESTS_MODE:
             if UNIT_TESTS_MODE or Config.json_file is None:
                 self._json_file = open('/dev/null', 'a')
+                self._json_logger = structlog.PrintLogger(self._json_file)
             else:
                 self._json_file = open(Config.json_file, 'a')
-            self._json_logger = structlog.PrintLogger(self._json_file)
+                self._json_logger = structlog.PrintLogger(self._json_file)
+                self._json_logger._write = functools.partial(write_with_lock,
+                                                             self._json_file)
+                self._json_logger._flush = functools.partial(flush_with_lock,
+                                                             self._json_file)
         if UNIT_TESTS_MODE:
             self._stdout_print_logger._flush = lambda *args, **kwargs: None
             self._stdout_print_logger._write = UNIT_TESTS_STDOUT.append
