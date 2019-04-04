@@ -5,6 +5,7 @@
 - add drone support
 
 ### Fix
+- atomic writing when logging big messages in json
 - don't use mflog_override paths if the corresponding variable is empty
 - isEnabledFor() and getEffectiveLevel() are now working
 - json file was not opened in append mode
