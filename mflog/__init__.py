@@ -113,7 +113,10 @@ class MFLogLogger(object):
         ts = event_dict.pop('timestamp')
         name = event_dict.pop('name', 'root')
         pid = event_dict.pop('pid')
-        msg = event_dict.pop('event')
+        try:
+            msg = event_dict.pop('event')
+        except KeyError:
+            msg = "None"
         exc = event_dict.pop('exception', None)
         event_dict.pop('exception_type', None)
         event_dict.pop('exception_file', None)

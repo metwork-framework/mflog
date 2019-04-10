@@ -211,6 +211,24 @@ def test_logging2():
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
 
 
+def test_empty_call1():
+    reset_unittests()
+    x = get_logger()
+    x.info()
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "None")
+
+
+def test_empty_call2():
+    reset_unittests()
+    x = get_logger()
+    x.info(None)
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "None")
+
+
 def test_thread_local_context():
     reset_unittests()
     set_config(thread_local_context=True)
