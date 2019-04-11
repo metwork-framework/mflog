@@ -336,6 +336,14 @@ def extra_context():
             "extra_context_key2": "extra_context_value2"}
 ```
 
+## Can I filter some context keys in stdout/stderr output (but keep them in json output) ?
+
+Yes, add `json_only_keys=["key1", "key2"]` to your `set_config()` call or use
+`MFLOG_JSON_ONLY_KEYS=key1,key2` environment variable.
+
+
+
+
 ## Contributing guide
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) file.
@@ -345,3 +353,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) file.
 ## Code of Conduct
 
 See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) file.
+
+
