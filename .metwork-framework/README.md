@@ -290,3 +290,42 @@ You have to understand what you are doing.
 If you want to use it, just add `thread_local_context=True` to your `set_config()`
 call. And you can use `.new(**new_values)` on mflog loggers to clear context
 and binds some initial values.
+
+
+## Can I globally add an extra context to each log line ?
+
+If you add `extra_context_func=your_python_func` to your `set_config()` call,
+and if `your_python_func` returns a dict of key/values as strings when called
+with no argument, these key/values will be added to your log context.
+
+Another way to do that without even calling `set_config()` is to define
+an environment variable called `MFLOG_EXTRA_CONTEXT_FUNC` containing the
+full path to your python func.
+
+Full example:
+
+```bash
+# in shell
+export MFLOG_EXTRA_CONTEXT_FUNC="mflog.unittests.extra_context"
+```
+
+then, in your python interpreter:
+
+```python
+>>> from mflog import get_logger
+>>> get_logger("foo").info("bar")
+2019-04-11T07:32:53.517260Z     [INFO] (foo#15379) bar {extra_context_key1=extra_context_value1 extra_context_key2=extra_context_value2}
+```
+
+Here is the code of `mflog.unittests.extra_context`:
+
+```python
+def extra_context():
+    return {"extra_context_key1": "extra_context_value1",
+            "extra_context_key2": "extra_context_value2"}
+```
+
+## Can I filter some context keys in stdout/stderr output (but keep them in json output) ?
+
+Yes, add `json_only_keys=["key1", "key2"]` to your `set_config()` call or use
+`MFLOG_JSON_ONLY_KEYS=key1,key2` environment variable.
