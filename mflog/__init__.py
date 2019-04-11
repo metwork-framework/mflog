@@ -10,7 +10,7 @@ import functools
 from mflog.utils import level_name_to_level_no, Config, \
     get_level_no_from_logger_name, write_with_lock, flush_with_lock
 from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
-    kv_renderer
+    kv_renderer, add_extra_context
 from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
     UNIT_TESTS_JSON, UNIT_TESTS_MODE
 
@@ -154,7 +154,7 @@ class MFLogLoggerFactory(object):
 
 def set_config(minimal_level=None, json_minimal_level=None,
                json_file=None, override_files=None,
-               thread_local_context=False):
+               thread_local_context=False, extra_context_func=None):
     """Set the logging configuration.
 
     The configuration is cached. So you can call this several times.
@@ -165,7 +165,8 @@ def set_config(minimal_level=None, json_minimal_level=None,
                         json_minimal_level=json_minimal_level,
                         json_file=json_file,
                         override_files=override_files,
-                        thread_local_context=thread_local_context)
+                        thread_local_context=thread_local_context,
+                        extra_context_func=extra_context_func)
     # Configure standard logging redirect to structlog
     d = {
         "version": 1,
@@ -194,6 +195,7 @@ def set_config(minimal_level=None, json_minimal_level=None,
             fltr,
             add_level,
             add_pid,
+            add_extra_context,
             structlog.processors.TimeStamper(fmt="iso", utc=True),
             add_exception_info,
             structlog.stdlib.PositionalArgumentsFormatter(),

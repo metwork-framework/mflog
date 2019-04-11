@@ -2,12 +2,12 @@
 
 import pytest
 import sys
-
+import os
 import force_unittests_mode  # noqa: F401
 import json
 from mflog import get_logger, set_config
 from mflog import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_JSON
-from mflog.unittests import reset_unittests
+from mflog.unittests import reset_unittests, extra_context
 import logging
 import six
 
@@ -227,6 +227,32 @@ def test_empty_call2():
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "None")
+
+
+def test_extra_context():
+    reset_unittests()
+    set_config(extra_context_func=extra_context)
+    x = get_logger("foo.bar")
+    x = x.bind(k1=1, k2="bar")
+    x.info("foo", k1=2, k3=2)
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo",
+                 "{extra_context_key1=extra_context_value1 "
+                 "extra_context_key2=extra_context_value2 k1=2 k2=bar k3=2}")
+
+
+def test_extra_context2():
+    reset_unittests()
+    os.environ["MFLOG_EXTRA_CONTEXT_FUNC"] = "mflog.unittests.extra_context"
+    x = get_logger("foo.bar")
+    x = x.bind(k1=1, k2="bar")
+    x.info("foo", k1=2, k3=2)
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo",
+                 "{extra_context_key1=extra_context_value1 "
+                 "extra_context_key2=extra_context_value2 k1=2 k2=bar k3=2}")
 
 
 def test_thread_local_context():

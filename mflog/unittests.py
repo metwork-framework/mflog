@@ -14,3 +14,12 @@ def reset_unittests():
     del(UNIT_TESTS_STDOUT[:])
     del(UNIT_TESTS_STDERR[:])
     del(UNIT_TESTS_JSON[:])
+    try:
+        del(os.environ["MFLOG_EXTRA_CONTEXT_FUNC"])
+    except Exception:
+        pass
+
+
+def extra_context():
+    return {"extra_context_key1": "extra_context_value1",
+            "extra_context_key2": "extra_context_value2"}

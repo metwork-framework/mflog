@@ -3,6 +3,7 @@
 import os
 import structlog
 from mflog.utils import level_name_to_level_no, get_level_no_from_logger_name
+from mflog.utils import get_extra_context
 
 
 def fltr(logger, method_name, event_dict):
@@ -24,6 +25,13 @@ def add_level(logger, method_name, event_dict):
 def add_pid(logger, method_name, event_dict):
     """Add the current pid in the event dict."""
     event_dict['pid'] = os.getpid()
+    return event_dict
+
+
+def add_extra_context(logger, method_name, event_dict):
+    """Add extra context in the event dict."""
+    extra_context = get_extra_context()
+    event_dict.update(extra_context)
     return event_dict
 
 

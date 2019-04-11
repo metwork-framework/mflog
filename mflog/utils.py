@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import os
 import fnmatch
 import logging
 import fcntl
+import sys
+import importlib
 
 OVERRIDE_LINES_CACHE = None
 LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -25,6 +28,33 @@ def flush_with_lock(f):
     fcntl.flock(f, fcntl.LOCK_UN)
 
 
+def get_func_by_path(func_path):
+    func_name = func_path.split('.')[-1]
+    module_path = ".".join(func_path.split('.')[0:-1])
+    if module_path == "":
+        print("ERROR: %s must follow 'pkg.function_name'" % func_path,
+              file=sys.stderr)
+        sys.exit(1)
+    if func_path.endswith(')'):
+        print("ERROR: %s must follow 'pkg.function_name'" % func_path,
+              file=sys.stderr)
+        print("=> EXIT", file=sys.stderr)
+        sys.exit(1)
+    try:
+        mod = importlib.import_module(module_path)
+    except Exception:
+        print("ERROR: can't import %s" % module_path, file=sys.stderr)
+        print("=> EXIT", file=sys.stderr)
+        sys.exit(1)
+    try:
+        return getattr(mod, func_name)
+    except Exception:
+        print("ERROR: can't get %s on %s" % (func_name, module_path),
+              file=sys.stderr)
+        print("=> EXIT", file=sys.stderr)
+        sys.exit(1)
+
+
 class classproperty(object):
 
     def __init__(self, f):
@@ -41,10 +71,12 @@ class Config(object):
     _json_minimal_level = None
     _json_file = None
     _override_files = None
+    _extra_context_func = None
 
     def __init__(self, minimal_level=None, json_minimal_level=None,
                  json_file=None, override_files=None,
-                 thread_local_context=False):
+                 thread_local_context=False,
+                 extra_context_func=None):
         global LEVEL_FROM_LOGGER_NAME_CACHE, OVERRIDE_LINES_CACHE
         OVERRIDE_LINES_CACHE = {}
         LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -91,6 +123,19 @@ class Config(object):
                         self._override_files.append(
                             "%s/config/mflog_override.conf" % env
                         )
+        if extra_context_func is not None:
+            self._extra_context_func = extra_context_func
+        else:
+            if "MFLOG_EXTRA_CONTEXT_FUNC" in os.environ:
+                self._extra_context_func = \
+                    get_func_by_path(os.environ['MFLOG_EXTRA_CONTEXT_FUNC'])
+            else:
+                self._extra_context_func = None
+        if self._extra_context_func and not callable(self._extra_context_func):
+            print("ERROR: extra_context_func must be a python callable",
+                  file=sys.stderr)
+            print("=> EXIT", file=sys.stderr)
+            sys.exit(1)
 
     @classmethod
     def get_instance(cls):
@@ -105,6 +150,10 @@ class Config(object):
     @classproperty
     def minimal_level(cls):  # pylint: disable=E0213
         return cls.get_instance()._minimal_level
+
+    @classproperty
+    def extra_context_func(cls):  # pylint: disable=E0213
+        return cls.get_instance()._extra_context_func
 
     @classproperty
     def json_minimal_level(cls):  # pylint: disable=E0213
@@ -193,6 +242,23 @@ def _get_override_lines(path):
         lines = _file_to_lines(path)
         OVERRIDE_LINES_CACHE[path] = lines
     return OVERRIDE_LINES_CACHE[path]
+
+
+def get_extra_context():
+    """Return an extra context by calling an external configured python func.
+
+    Returns:
+        (dict) A dict of extra context key/values as strings.
+
+    """
+    extra_context_f = Config.extra_context_func
+    if extra_context_f is None:
+        return {}
+    extra_context = extra_context_f()  # pylint: disable=E1120
+    if not isinstance(extra_context, dict):
+        print("bad extra_context (not a dict) => ignoring", file=sys.stderr)
+        return {}
+    return extra_context
 
 
 def get_level_no_from_logger_name(logger_name):
