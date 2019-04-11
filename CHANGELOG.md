@@ -6,6 +6,7 @@
 
 ### Fix
 - atomic writing when logging big messages in json
+- avoid exception when called with no argument (or None)
 - don't use mflog_override paths if the corresponding variable is empty
 - isEnabledFor() and getEffectiveLevel() are now working
 - json file was not opened in append mode
