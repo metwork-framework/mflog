@@ -64,6 +64,7 @@ class MFLogLogger(object):
     _unittests_stdout = None
     _unittests_stderr = None
     _unittests_json = None
+    _json_only_keys = None
     name = None
 
     def __init__(self, *args):
@@ -91,6 +92,7 @@ class MFLogLogger(object):
             self._stderr_print_logger._write = UNIT_TESTS_STDERR.append
             self._json_logger._flush = lambda *args, **kwargs: None
             self._json_logger._write = UNIT_TESTS_JSON.append
+        self._json_only_keys = Config.json_only_keys
 
     def _msg_stdout(self, **event_dict):
         self._json(**event_dict)
@@ -120,6 +122,11 @@ class MFLogLogger(object):
         exc = event_dict.pop('exception', None)
         event_dict.pop('exception_type', None)
         event_dict.pop('exception_file', None)
+        for key in self._json_only_keys:  # pylint: disable=E1133
+            try:
+                event_dict.pop(key)
+            except KeyError:
+                pass
         extra = ""
         if len(event_dict) > 0:
             extra = " {%s}" % kv_renderer(None, None, event_dict)
@@ -154,7 +161,8 @@ class MFLogLoggerFactory(object):
 
 def set_config(minimal_level=None, json_minimal_level=None,
                json_file=None, override_files=None,
-               thread_local_context=False, extra_context_func=None):
+               thread_local_context=False, extra_context_func=None,
+               json_only_keys=None):
     """Set the logging configuration.
 
     The configuration is cached. So you can call this several times.
@@ -166,7 +174,8 @@ def set_config(minimal_level=None, json_minimal_level=None,
                         json_file=json_file,
                         override_files=override_files,
                         thread_local_context=thread_local_context,
-                        extra_context_func=extra_context_func)
+                        extra_context_func=extra_context_func,
+                        json_only_keys=json_only_keys)
     # Configure standard logging redirect to structlog
     d = {
         "version": 1,

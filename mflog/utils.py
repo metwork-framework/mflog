@@ -72,11 +72,12 @@ class Config(object):
     _json_file = None
     _override_files = None
     _extra_context_func = None
+    _json_only_keys = None
 
     def __init__(self, minimal_level=None, json_minimal_level=None,
                  json_file=None, override_files=None,
                  thread_local_context=False,
-                 extra_context_func=None):
+                 extra_context_func=None, json_only_keys=None):
         global LEVEL_FROM_LOGGER_NAME_CACHE, OVERRIDE_LINES_CACHE
         OVERRIDE_LINES_CACHE = {}
         LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -136,6 +137,14 @@ class Config(object):
                   file=sys.stderr)
             print("=> EXIT", file=sys.stderr)
             sys.exit(1)
+        if json_only_keys is not None:
+            self._json_only_keys = json_only_keys
+        else:
+            if "MFLOG_JSON_ONLY_KEYS" in os.environ:
+                self._json_only_keys = \
+                    os.environ["MFLOG_JSON_ONLY_KEYS"].split(',')
+            else:
+                self._json_only_keys = []
 
     @classmethod
     def get_instance(cls):
@@ -166,6 +175,10 @@ class Config(object):
     @classproperty
     def override_files(cls):  # pylint: disable=E0213
         return cls.get_instance()._override_files
+
+    @classproperty
+    def json_only_keys(cls):  # pylint: disable=E0213
+        return cls.get_instance()._json_only_keys
 
 
 def level_name_to_level_no(level_name):

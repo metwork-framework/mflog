@@ -255,6 +255,29 @@ def test_extra_context2():
                  "extra_context_key2=extra_context_value2 k1=2 k2=bar k3=2}")
 
 
+def test_json_only_keys1():
+    reset_unittests()
+    set_config(json_only_keys=["extra_context_key1", "extra_context_key2"])
+    x = get_logger("foo.bar")
+    x = x.bind(k1=1, k2="bar")
+    x.info("foo", k1=2, k3=2)
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
+
+
+def test_json_only_keys2():
+    reset_unittests()
+    os.environ["MFLOG_JSON_ONLY_KEYS"] = \
+        "extra_context_key1,extra_context_key2"
+    x = get_logger("foo.bar")
+    x = x.bind(k1=1, k2="bar")
+    x.info("foo", k1=2, k3=2)
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
+
+
 def test_thread_local_context():
     reset_unittests()
     set_config(thread_local_context=True)
