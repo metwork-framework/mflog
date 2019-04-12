@@ -2,7 +2,9 @@
 ## [Unreleased]
 
 ### Feat
+- add an option to hide key/values in stdout/stderr
 - add drone support
+- add extra_context_func option
 
 ### Fix
 - atomic writing when logging big messages in json
