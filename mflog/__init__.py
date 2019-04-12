@@ -2,6 +2,7 @@
 
 import sys
 import json
+import os
 import logging
 import logging.config
 import structlog
@@ -162,7 +163,7 @@ class MFLogLoggerFactory(object):
 def set_config(minimal_level=None, json_minimal_level=None,
                json_file=None, override_files=None,
                thread_local_context=False, extra_context_func=None,
-               json_only_keys=None):
+               json_only_keys=None, standard_logging_redirect=None):
     """Set the logging configuration.
 
     The configuration is cached. So you can call this several times.
@@ -176,24 +177,35 @@ def set_config(minimal_level=None, json_minimal_level=None,
                         thread_local_context=thread_local_context,
                         extra_context_func=extra_context_func,
                         json_only_keys=json_only_keys)
-    # Configure standard logging redirect to structlog
-    d = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {},
-        "handlers": {},
-        "filters": {},
-        "loggers": {
-            "": {
-                "level": "NOTSET"
+    if standard_logging_redirect is not None:
+        slr = standard_logging_redirect
+    else:
+        if 'MFLOG_STANDARD_LOGGING_REDIRECT' in os.environ:
+            slr = (os.environ['MFLOG_STANDARD_LOGGING_REDIRECT'] == '1')
+        else:
+            slr = True  # default value
+    if slr:
+        # Configure standard logging redirect to structlog
+        d = {
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {},
+            "handlers": {},
+            "filters": {},
+            "loggers": {
+                "": {
+                    "level": "NOTSET"
+                }
             }
         }
-    }
-    logging.config.dictConfig(d)
-    root_logger = logging.getLogger()
-    root_logger.addHandler(StructlogHandler())
-    root_logger.setLevel(logging.NOTSET)
-
+        logging.config.dictConfig(d)
+        root_logger = logging.getLogger()
+        root_logger.addHandler(StructlogHandler())
+        root_logger.setLevel(logging.NOTSET)
+    else:
+        root_logger = logging.getLogger()
+        root_logger.handlers = [x for x in root_logger.handlers
+                                if not isinstance(x, StructlogHandler)]
     # Configure structlog
     context_class = None
     if thread_local_context:
@@ -245,3 +257,8 @@ def get_logger(logger_name='root'):
     you are sure that the logging config is set.
     """
     return getLogger(logger_name)
+
+
+def __unset_configuration():
+    global CONFIGURATION_SET
+    CONFIGURATION_SET = False

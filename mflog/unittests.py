@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import mflog
 
 UNIT_TESTS_MODE = (os.environ.get('_MFLOG_UNITTESTS', '0') == '1')
 UNIT_TESTS_STDOUT = []
@@ -22,6 +23,7 @@ def reset_unittests():
         del(os.environ["MFLOG_JSON_ONLY_KEYS"])
     except Exception:
         pass
+    mflog.__unset_configuration()
 
 
 def extra_context():

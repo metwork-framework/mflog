@@ -211,6 +211,16 @@ def test_logging2():
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
 
 
+def test_logging5():
+    reset_unittests()
+    set_config(standard_logging_redirect=False)
+    x = logging.getLogger()
+    x.info("foobar")
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    assert UNIT_TESTS_STDOUT == []
+
+
 def test_empty_call1():
     reset_unittests()
     x = get_logger()
@@ -276,30 +286,6 @@ def test_json_only_keys2():
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
-
-
-def test_thread_local_context():
-    reset_unittests()
-    set_config(thread_local_context=True)
-    x = get_logger("foo.bar")
-    x = x.bind(k1=1, k2="bar")
-    x.info("foo", k1=2, k3=2)
-    assert UNIT_TESTS_STDERR == []
-    assert UNIT_TESTS_JSON == []
-    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
-    reset_unittests()
-    y = get_logger("foo.bar2")
-    y.info("foo", k1=2, k3=2)
-    assert UNIT_TESTS_STDERR == []
-    assert UNIT_TESTS_JSON == []
-    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
-    set_config()
-    reset_unittests()
-    z = get_logger()
-    z.info("foo", k1=2, k3=2)
-    assert UNIT_TESTS_STDERR == []
-    assert UNIT_TESTS_JSON == []
-    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k3=2}")
 
 
 def test_is_enabled_for():

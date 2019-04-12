@@ -329,3 +329,8 @@ def extra_context():
 
 Yes, add `json_only_keys=["key1", "key2"]` to your `set_config()` call or use
 `MFLOG_JSON_ONLY_KEYS=key1,key2` environment variable.
+
+## What about if I don't want to redirect standard python `logging` to `mflog` ?
+
+You can add `standard_logging_redirect=False` in your `set_config()` call
+of set `MFLOG_STANDARD_LOGGING_REDIRECT=0` environment variable.
