@@ -146,6 +146,15 @@ def test_template_info():
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foobar")
 
 
+def test_template_info2():
+    reset_unittests()
+    x = get_logger()
+    x.info("foo%(u)s", {"u": "bar"})
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foobar")
+
+
 def test_kv_warning():
     reset_unittests()
     x = get_logger()
@@ -209,6 +218,24 @@ def test_logging2():
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
     _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
+
+
+def test_logging3():
+    reset_unittests()
+    x = logging.getLogger()
+    x.info("foo %s", "bar")
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo bar")
+
+
+def test_logging4():
+    reset_unittests()
+    x = logging.getLogger()
+    x.info("foo %(u)s", {"u": "bar"})
+    assert UNIT_TESTS_STDERR == []
+    assert UNIT_TESTS_JSON == []
+    _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo bar")
 
 
 def test_logging5():

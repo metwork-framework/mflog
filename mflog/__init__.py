@@ -44,17 +44,25 @@ class StructlogHandler(logging.Handler):
             kwargs['exc_info'] = record.exc_info
         logger = self.__get_logger(record.name)
         if record.levelno == logging.DEBUG:
-            logger.debug(record.msg, *(record.args), **kwargs)
+            f = logger.debug
         elif record.levelno == logging.INFO:
-            logger.info(record.msg, *(record.args), **kwargs)
+            f = logger.info
         elif record.levelno == logging.WARNING:
-            logger.warning(record.msg, *(record.args), **kwargs)
+            f = logger.warning
         elif record.levelno == logging.ERROR:
-            logger.error(record.msg, *(record.args), **kwargs)
+            f = logger.error
         elif record.levelno == logging.CRITICAL:
-            logger.critical(record.msg, *(record.args), **kwargs)
+            f = logger.critical
         else:
             raise Exception("unknown levelno: %i" % record.levelno)
+        # Mimick the formatting behaviour of the stdlib's logging
+        # module, which accepts both positional arguments and a single
+        # dict argument.
+        if record.args and len(record.args) == 1 and \
+                isinstance(record.args, dict):
+            f(record.msg, record.args, **kwargs)
+        else:
+            f(record.msg, *(record.args), **kwargs)
 
 
 class MFLogLogger(object):
