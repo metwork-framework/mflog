@@ -58,8 +58,7 @@ class StructlogHandler(logging.Handler):
         # Mimick the formatting behaviour of the stdlib's logging
         # module, which accepts both positional arguments and a single
         # dict argument.
-        if record.args and len(record.args) == 1 and \
-                isinstance(record.args, dict):
+        if record.args and isinstance(record.args, dict):
             f(record.msg, record.args, **kwargs)
         else:
             f(record.msg, *(record.args), **kwargs)
