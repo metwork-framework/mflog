@@ -2,14 +2,18 @@
 ## [Unreleased]
 
 ### Feat
+- add an option to avoid to redirect standard python logging
 - add an option to hide key/values in stdout/stderr
 - add drone support
 - add extra_context_func option
+- upgrade structlog
 
 ### Fix
 - atomic writing when logging big messages in json
 - avoid exception when called with no argument (or None)
 - don't use mflog_override paths if the corresponding variable is empty
+- fix latest commit
+- fix some string templating issues in corner cases
 - isEnabledFor() and getEffectiveLevel() are now working
 - json file was not opened in append mode
 - logger names were not logged
