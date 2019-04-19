@@ -1,23 +1,30 @@
-<a name="unreleased"></a>
+# CHANGELOG
+
+
 ## [Unreleased]
 
-### Feat
+### New Features
 - add an option to avoid to redirect standard python logging
-- add an option to hide key/values in stdout/stderr
-- add drone support
-- add extra_context_func option
 - upgrade structlog
+- add an option to hide key/values in stdout/stderr
+- add extra_context_func option
+- add drone support
 
-### Fix
-- atomic writing when logging big messages in json
-- avoid exception when called with no argument (or None)
-- don't use mflog_override paths if the corresponding variable is empty
+
+### Bug Fixes
 - fix latest commit
 - fix some string templating issues in corner cases
-- isEnabledFor() and getEffectiveLevel() are now working
-- json file was not opened in append mode
-- logger names were not logged
+- avoid exception when called with no argument (or None)
+- atomic writing when logging big messages in json
 - null files in metwork environment (again)
 - null files was created in some directories
+- isEnabledFor() and getEffectiveLevel() are now working
 - we can now give an exception object to "exception() method"
+- logger names were not logged
+- json file was not opened in append mode
+- don't use mflog_override paths if the corresponding variable is
+
+
+
+
 
