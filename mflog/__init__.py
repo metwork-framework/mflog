@@ -102,6 +102,16 @@ class MFLogLogger(object):
             self._json_logger._write = UNIT_TESTS_JSON.append
         self._json_only_keys = Config.json_only_keys
 
+    def close(self):
+        if self._json_file:
+            try:
+                self._json_file.close()
+            except Exception:
+                pass
+
+    def __del__(self):
+        self.close()
+
     def _msg_stdout(self, **event_dict):
         self._json(**event_dict)
         self._stdout_print_logger.msg(self._format(event_dict))
