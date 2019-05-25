@@ -12,6 +12,7 @@
 
 
 ### Bug Fixes
+- close #11
 - fix latest commit
 - fix some string templating issues in corner cases
 - avoid exception when called with no argument (or None)
