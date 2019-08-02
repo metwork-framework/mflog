@@ -43,18 +43,19 @@ class StructlogHandler(logging.Handler):
         if record.exc_info:
             kwargs['exc_info'] = record.exc_info
         logger = self.__get_logger(record.name)
-        if record.levelno == logging.DEBUG:
-            f = logger.debug
-        elif record.levelno == logging.INFO:
-            f = logger.info
-        elif record.levelno == logging.WARNING:
-            f = logger.warning
-        elif record.levelno == logging.ERROR:
-            f = logger.error
-        elif record.levelno == logging.CRITICAL:
+        if record.levelno >= logging.CRITICAL:
             f = logger.critical
+        elif record.levelno >= logging.ERROR:
+            f = logger.error
+        elif record.levelno >= logging.WARNING:
+            f = logger.warning
+        elif record.levelno >= logging.INFO:
+            f = logger.info
+        elif record.levelno >= logging.DEBUG:
+            f = logger.debug
         else:
-            raise Exception("unknown levelno: %i" % record.levelno)
+            # let's ignore this
+            return
         # Mimick the formatting behaviour of the stdlib's logging
         # module, which accepts both positional arguments and a single
         # dict argument.
