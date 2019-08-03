@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- allow some non standards logging levels
 - add an option to avoid to redirect standard python logging
 - upgrade structlog
 - add an option to hide key/values in stdout/stderr
