@@ -11,6 +11,7 @@ setup(
     name='mflog',
     packages=find_packages(),
     install_requires=install_requires,
+    url="https://github.com/metwork-framework/mflog",
     entry_points={
         "console_scripts": [
             "log = mflog.log:main",
