@@ -2,12 +2,17 @@
 
 [//]: # (automatically generated from https://github.com/metwork-framework/resources/blob/master/cookiecutter/_%7B%7Bcookiecutter.repo%7D%7D/README.md)
 
-## Status (master branch)
+**Status (master branch)**
+
+
+
 [![Drone CI](http://metwork-framework.org:8000/api/badges/metwork-framework/mflog/status.svg)](http://metwork-framework.org:8000/metwork-framework/mflog)
 [![Maintenance](https://github.com/metwork-framework/resources/blob/master/badges/maintained.svg)]()
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/metwork-framework/mflog/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/metwork-framework/mflog/?branch=master)
 [![codecov](https://codecov.io/gh/metwork-framework/mflog/branch/master/graph/badge.svg)](https://codecov.io/gh/metwork-framework/mflog)
 
+
+[//]: # (TABLE_OF_CONTENTS_PLACEHOLDER)
 
 ## What is it ?
 
