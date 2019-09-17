@@ -13,9 +13,9 @@ LEVEL_FROM_LOGGER_NAME_CACHE = {}
 
 # metwork stuff
 MFCOM_HOME = os.environ.get('MFCOM_HOME', None)
-MODULE_HOME = os.environ.get('MODULE_HOME', None)
-MODULE_RUNTIME_HOME = os.environ.get('MODULE_RUNTIME_HOME', None)
-MODULE = os.environ.get('MODULE', 'UNKNOWN')
+MFMODULE_HOME = os.environ.get('MFMODULE_HOME', None)
+MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', None)
+MFMODULE = os.environ.get('MFMODULE', 'UNKNOWN')
 
 
 def write_with_lock(f, message):
@@ -88,7 +88,7 @@ class Config(object):
             if self._minimal_level is None:
                 # metwork mode
                 self._minimal_level = \
-                    os.environ.get('%s_LOG_MINIMAL_LEVEL' % MODULE, 'INFO')
+                    os.environ.get('%s_LOG_MINIMAL_LEVEL' % MFMODULE, 'INFO')
         if json_minimal_level is not None:
             self._json_minimal_level = json_minimal_level
         else:
@@ -97,7 +97,7 @@ class Config(object):
             if self._json_minimal_level is None:
                 # metwork mode
                 self._json_minimal_level = \
-                    os.environ.get('%s_LOG_JSON_MINIMAL_LEVEL' % MODULE,
+                    os.environ.get('%s_LOG_JSON_MINIMAL_LEVEL' % MFMODULE,
                                    'WARNING')
         if json_file is not None:
             self._json_file = json_file
@@ -105,7 +105,7 @@ class Config(object):
             self._json_file = os.environ.get("MFLOG_JSON_FILE", None)
             if self._json_file is None:
                 # metwork mode
-                self._json_file = os.environ.get('%s_LOG_JSON_FILE' % MODULE,
+                self._json_file = os.environ.get('%s_LOG_JSON_FILE' % MFMODULE,
                                                  None)
             if self._json_file == "null":
                 self._json_file = None
@@ -119,7 +119,7 @@ class Config(object):
             else:
                 # metwork mode
                 self._override_files = []
-                for env in MODULE_RUNTIME_HOME, MODULE_HOME, MFCOM_HOME:
+                for env in MFMODULE_RUNTIME_HOME, MFMODULE_HOME, MFCOM_HOME:
                     if env:
                         self._override_files.append(
                             "%s/config/mflog_override.conf" % env
