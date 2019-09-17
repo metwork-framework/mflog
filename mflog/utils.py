@@ -13,9 +13,10 @@ LEVEL_FROM_LOGGER_NAME_CACHE = {}
 
 # metwork stuff
 MFCOM_HOME = os.environ.get('MFCOM_HOME', None)
-MODULE_HOME = os.environ.get('MODULE_HOME', None)
-MODULE_RUNTIME_HOME = os.environ.get('MODULE_RUNTIME_HOME', None)
-MODULE = os.environ.get('MODULE', 'UNKNOWN')
+MODULE_HOME = os.environ.get('MFMODULE_HOME', os.environ.get('MODULE_HOME', None))
+MODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', 
+                                     os.environ.get('MODULE_RUNTIME_HOME', None))
+MODULE = os.environ.get('MFMODULE', os.environ.get('MODULE', 'UNKNOWN'))
 
 
 def write_with_lock(f, message):
