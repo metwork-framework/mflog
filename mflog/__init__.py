@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import sys
 import json
 import os
@@ -113,13 +114,23 @@ class MFLogLogger(object):
     def __del__(self):
         self.close()
 
+    def _msg(self, std_logger, **event_dict):
+        try:
+            self._json(**event_dict)
+        except Exception as e:
+            print("MFLOG ERROR: can't write log message to json output "
+                  "with exception: %s" % e, file=sys.stderr)
+        try:
+            std_logger.msg(self._format(event_dict))
+        except Exception as e:
+            print("MFLOG ERROR: can't write log message to stdout/err "
+                  "with exception: %s" % e, file=sys.stderr)
+
     def _msg_stdout(self, **event_dict):
-        self._json(**event_dict)
-        self._stdout_print_logger.msg(self._format(event_dict))
+        self._msg(self._stdout_print_logger, **event_dict)
 
     def _msg_stderr(self, **event_dict):
-        self._json(**event_dict)
-        self._stderr_print_logger.msg(self._format(event_dict))
+        self._msg(self._stderr_print_logger, **event_dict)
 
     def _json(self, **event_dict):
         if Config.json_file is None and not UNIT_TESTS_MODE:
