@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- feat: replace MODULE* environment variables names by MFMODULE* (MODULE_HOME becomes MFMODULE_HOME and so on)
 - allow some non standards logging levels
 - add an option to avoid to redirect standard python logging
 - upgrade structlog
