@@ -194,7 +194,7 @@ In a MetWork context, this is already configured and you can use:
 
 - `{MFMODULE_RUNTIME_HOME}/config/mflog_override.conf`
 - `{MFMODULE_HOME}/config/mflog_override.conf`
-- `{MFCOM_HOME}/config/mflog_override.conf`
+- `{MFEXT_HOME}/config/mflog_override.conf`
 
 ## Link with standard python logging library
 
