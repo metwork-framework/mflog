@@ -12,7 +12,7 @@ OVERRIDE_LINES_CACHE = None
 LEVEL_FROM_LOGGER_NAME_CACHE = {}
 
 # metwork stuff
-MFCOM_HOME = os.environ.get('MFCOM_HOME', None)
+MFEXT_HOME = os.environ.get('MFEXT_HOME', None)
 MFMODULE_HOME = os.environ.get('MFMODULE_HOME',
                                os.environ.get('MODULE_HOME', None))
 MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME',
@@ -122,7 +122,7 @@ class Config(object):
             else:
                 # metwork mode
                 self._override_files = []
-                for env in MFMODULE_RUNTIME_HOME, MFMODULE_HOME, MFCOM_HOME:
+                for env in MFMODULE_RUNTIME_HOME, MFMODULE_HOME, MFEXT_HOME:
                     if env:
                         self._override_files.append(
                             "%s/config/mflog_override.conf" % env
