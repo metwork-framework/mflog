@@ -10,7 +10,8 @@ import structlog
 import functools
 
 from mflog.utils import level_name_to_level_no, Config, \
-    get_level_no_from_logger_name, write_with_lock, flush_with_lock
+    get_level_no_from_logger_name, write_with_lock, flush_with_lock, \
+    __reset_level_from_logger_name_cache
 from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
     kv_renderer, add_extra_context
 from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
@@ -260,6 +261,31 @@ def set_config(minimal_level=None, json_minimal_level=None,
         logger_factory=MFLogLoggerFactory()
     )
     CONFIGURATION_SET = True
+
+
+def add_override(logger_name_pattern, minimal_level_name):
+    """Add an override to the configuration.
+
+    You provide a fnmatch pattern to the logger_name as the first argument.
+    And the minimal_level_name (WARNING, DEBUG...) to force for this pattern.
+
+    Note: if you use None as minimal_level_name, it will delete the override.
+
+    """
+    if not CONFIGURATION_SET:
+        set_config()
+    if minimal_level_name is None:
+        try:
+            del(Config.override_dict[logger_name_pattern])
+        except KeyError:
+            pass
+    else:
+        # just to raise an exception here
+        # if the minimal_level_name is incorrect
+        level_name_to_level_no(minimal_level_name)
+        d = Config.override_dict
+        d[logger_name_pattern] = minimal_level_name
+    __reset_level_from_logger_name_cache()
 
 
 def getLogger(logger_name='root'):

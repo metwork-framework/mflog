@@ -334,3 +334,20 @@ Yes, add `json_only_keys=["key1", "key2"]` to your `set_config()` call or use
 
 You can add `standard_logging_redirect=False` in your `set_config()` call
 of set `MFLOG_STANDARD_LOGGING_REDIRECT=0` environment variable.
+
+## Can I silent a specific noisy logger?
+
+You can use `override_files` feature to do that or you can also use the
+`mflog.add_override` function.
+
+For example:
+
+```python
+import mflog
+
+# for all mylogger.* loggers (fnmatch pattern), the minimal level is CRITICAL
+mflog.add_override("mylogger.*", CRITICAL)
+
+# Not very intesting but this call will be ignored
+mflog.get_logger("mylogger.foo").warning("foo")
+```

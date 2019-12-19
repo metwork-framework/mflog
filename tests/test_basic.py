@@ -5,7 +5,7 @@ import sys
 import os
 import force_unittests_mode  # noqa: F401
 import json
-from mflog import get_logger, set_config
+from mflog import get_logger, set_config, add_override
 from mflog import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_JSON
 from mflog.unittests import reset_unittests, extra_context
 import logging
@@ -45,6 +45,19 @@ def test_basic_warning():
     assert UNIT_TESTS_STDOUT == []
     _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
     _test_json("WARNING", "foo")
+
+
+def test_override_dict():
+    reset_unittests()
+    add_override("foo2.*", "CRITICAL")
+    x = get_logger("foo.bar")
+    y = get_logger("foo2.bar")
+    x.warning("foo")
+    y.warning("foo2")
+    assert UNIT_TESTS_STDOUT == []
+    _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
+    _test_json("WARNING", "foo")
+    add_override("foo.*", None)
 
 
 def test_basic_log():

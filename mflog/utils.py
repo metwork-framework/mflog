@@ -31,6 +31,11 @@ def flush_with_lock(f):
     fcntl.flock(f, fcntl.LOCK_UN)
 
 
+def __reset_level_from_logger_name_cache():
+    global LEVEL_FROM_LOGGER_NAME_CACHE
+    LEVEL_FROM_LOGGER_NAME_CACHE = {}
+
+
 def get_func_by_path(func_path):
     func_name = func_path.split('.')[-1]
     module_path = ".".join(func_path.split('.')[0:-1])
@@ -74,13 +79,15 @@ class Config(object):
     _json_minimal_level = None
     _json_file = None
     _override_files = None
+    _override_dict = None
     _extra_context_func = None
     _json_only_keys = None
 
     def __init__(self, minimal_level=None, json_minimal_level=None,
                  json_file=None, override_files=None,
                  thread_local_context=False,
-                 extra_context_func=None, json_only_keys=None):
+                 extra_context_func=None, json_only_keys=None,
+                 override_dict={}):
         global LEVEL_FROM_LOGGER_NAME_CACHE, OVERRIDE_LINES_CACHE
         OVERRIDE_LINES_CACHE = {}
         LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -148,6 +155,7 @@ class Config(object):
                     os.environ["MFLOG_JSON_ONLY_KEYS"].split(',')
             else:
                 self._json_only_keys = []
+        self._override_dict = override_dict
 
     @classmethod
     def get_instance(cls):
@@ -178,6 +186,10 @@ class Config(object):
     @classproperty
     def override_files(cls):  # pylint: disable=E0213
         return cls.get_instance()._override_files
+
+    @classproperty
+    def override_dict(cls):  # pylint: disable=E0213
+        return cls.get_instance()._override_dict
 
     @classproperty
     def json_only_keys(cls):  # pylint: disable=E0213
@@ -280,8 +292,11 @@ def get_extra_context():
 def get_level_no_from_logger_name(logger_name):
     """Get the level number to use for the given logger name.
 
-    Note: we check each files in override_files configuration. The first match
-        wins. If there is no mathc, we return the default level number.
+    Note:
+      - first we search in override_dict, if there is a match, it's over
+      - (if no match) at first step, we check each files in override_files
+        configuration. The first match wins.
+      - if there is no match, we return the default level number.
 
     Note: the result is cached in memory.
 
@@ -298,6 +313,11 @@ def get_level_no_from_logger_name(logger_name):
         pass
 
     if logger_name not in LEVEL_FROM_LOGGER_NAME_CACHE:
+        for k, v in Config.override_dict.items():
+            if fnmatch.fnmatch(logger_name, k):
+                LEVEL_FROM_LOGGER_NAME_CACHE[logger_name] = \
+                    level_name_to_level_no(v)
+                return LEVEL_FROM_LOGGER_NAME_CACHE[logger_name]
         paths = Config.override_files
         try:
             for path in paths:  # pylint: disable=E1133
