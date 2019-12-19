@@ -82,12 +82,16 @@ class Config(object):
     _override_dict = None
     _extra_context_func = None
     _json_only_keys = None
+    _syslog_address = None
+    _syslog_format = None
+    _syslog_minimal_level = None
 
     def __init__(self, minimal_level=None, json_minimal_level=None,
                  json_file=None, override_files=None,
                  thread_local_context=False,
                  extra_context_func=None, json_only_keys=None,
-                 override_dict={}):
+                 override_dict={}, syslog_address=None, syslog_format=None,
+                 syslog_minimal_level=None):
         global LEVEL_FROM_LOGGER_NAME_CACHE, OVERRIDE_LINES_CACHE
         OVERRIDE_LINES_CACHE = {}
         LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -109,6 +113,30 @@ class Config(object):
                 self._json_minimal_level = \
                     os.environ.get('%s_LOG_JSON_MINIMAL_LEVEL' % MFMODULE,
                                    'WARNING')
+        if syslog_minimal_level is not None:
+            self._syslog_minimal_level = syslog_minimal_level
+        else:
+            self._syslog_minimal_level = \
+                os.environ.get('MFLOG_SYSLOG_MINIMAL_LEVEL', None)
+            if self._syslog_minimal_level is None:
+                # metwork mode
+                self._syslog_minimal_level = \
+                    os.environ.get('%s_LOG_SYSLOG_MINIMAL_LEVEL' % MFMODULE,
+                                   'WARNING')
+        if syslog_format is not None:
+            self._syslog_format = syslog_format
+        else:
+            self._syslog_format = \
+                os.environ.get('MFLOG_SYSLOG_FORMAT', None)
+            if self._syslog_format is None:
+                # metwork mode
+                self._syslog_format = \
+                    os.environ.get('%s_LOG_SYSLOG_FORMAT' % MFMODULE, 'null')
+        if self._syslog_format not in ('null', 'msg_only', 'json'):
+            raise Exception("unknown syslog format: %s => must be null, "
+                            "msg_only or json")
+        if self._syslog_format == "null":
+            self._syslog_format = None
         if json_file is not None:
             self._json_file = json_file
         else:
@@ -119,6 +147,16 @@ class Config(object):
                                                  None)
             if self._json_file == "null":
                 self._json_file = None
+        if syslog_address is not None:
+            self._syslog_address = syslog_address
+        else:
+            self._syslog_address = os.environ.get("MFLOG_SYSLOG_ADDRESS", None)
+            if self._syslog_address is None:
+                # metwork mode
+                self._syslog_address = \
+                    os.environ.get('%s_LOG_SYSLOG_ADDRESS' % MFMODULE, None)
+            if self._syslog_address == "null":
+                self._syslog_address = None
         if override_files is not None:
             self._override_files = override_files
         else:
@@ -186,6 +224,18 @@ class Config(object):
     @classproperty
     def override_files(cls):  # pylint: disable=E0213
         return cls.get_instance()._override_files
+
+    @classproperty
+    def syslog_minimal_level(cls):  # pylint: disable=E0213
+        return cls.get_instance()._syslog_minimal_level
+
+    @classproperty
+    def syslog_address(cls):  # pylint: disable=E0213
+        return cls.get_instance()._syslog_address
+
+    @classproperty
+    def syslog_format(cls):  # pylint: disable=E0213
+        return cls.get_instance()._syslog_format
 
     @classproperty
     def override_dict(cls):  # pylint: disable=E0213

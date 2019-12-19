@@ -16,6 +16,7 @@ from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
     kv_renderer, add_extra_context
 from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
     UNIT_TESTS_JSON, UNIT_TESTS_MODE
+from mflog.syslog import SyslogLogger
 
 CONFIGURATION_SET = False
 
@@ -71,6 +72,7 @@ class MFLogLogger(object):
 
     _stdout_print_logger = None
     _stderr_print_logger = None
+    _syslog_logger = None
     _json_file = None
     _unittests_stdout = None
     _unittests_stderr = None
@@ -85,6 +87,9 @@ class MFLogLogger(object):
             self.name = 'root'
         self._stdout_print_logger = structlog.PrintLogger(sys.stdout)
         self._stderr_print_logger = structlog.PrintLogger(sys.stderr)
+        if Config.syslog_address:
+            self._syslog_logger = SyslogLogger(Config.syslog_address,
+                                               Config.syslog_format)
         if Config.json_file or UNIT_TESTS_MODE:
             if UNIT_TESTS_MODE or Config.json_file is None:
                 self._json_file = open('/dev/null', 'a')
@@ -111,6 +116,8 @@ class MFLogLogger(object):
                 self._json_file.close()
             except Exception:
                 pass
+        if self._syslog_logger is not None:
+            self._syslog_logger.close()
 
     def __del__(self):
         self.close()
@@ -120,6 +127,11 @@ class MFLogLogger(object):
             self._json(**event_dict)
         except Exception as e:
             print("MFLOG ERROR: can't write log message to json output "
+                  "with exception: %s" % e, file=sys.stderr)
+        try:
+            self._syslog(**event_dict)
+        except Exception as e:
+            print("MFLOG ERROR: can't write log message to syslog output "
                   "with exception: %s" % e, file=sys.stderr)
         try:
             std_logger.msg(self._format(event_dict))
@@ -140,6 +152,15 @@ class MFLogLogger(object):
         if method_level_no < level_name_to_level_no(Config.json_minimal_level):
             return
         self._json_logger.msg(json.dumps(event_dict))
+
+    def _syslog(self, **event_dict):
+        if Config.syslog_address is None:
+            return
+        method_level_no = level_name_to_level_no(event_dict['level'])
+        syslog_minimal_level = Config.syslog_minimal_level
+        if method_level_no < level_name_to_level_no(syslog_minimal_level):
+            return
+        self._syslog_logger.msg(event_dict)
 
     def _format(self, event_dict):
         level = "[%s]" % event_dict.pop('level').upper()
@@ -193,7 +214,8 @@ class MFLogLoggerFactory(object):
 def set_config(minimal_level=None, json_minimal_level=None,
                json_file=None, override_files=None,
                thread_local_context=False, extra_context_func=None,
-               json_only_keys=None, standard_logging_redirect=None):
+               json_only_keys=None, standard_logging_redirect=None,
+               override_dict={}, syslog_address=None, syslog_format=None):
     """Set the logging configuration.
 
     The configuration is cached. So you can call this several times.
@@ -206,7 +228,10 @@ def set_config(minimal_level=None, json_minimal_level=None,
                         override_files=override_files,
                         thread_local_context=thread_local_context,
                         extra_context_func=extra_context_func,
-                        json_only_keys=json_only_keys)
+                        json_only_keys=json_only_keys,
+                        override_dict=override_dict,
+                        syslog_address=syslog_address,
+                        syslog_format=syslog_format)
     if standard_logging_redirect is not None:
         slr = standard_logging_redirect
     else:
