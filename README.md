@@ -68,11 +68,13 @@ On `json output file`, you will get:
 - we use main ideas from `structlog` library
 - we log `[DEBUG]` and `[INFO]` messages on `stdout` (in a human friendly way)
 - we log `[WARNING]`, `[ERROR]` and `[CRITICAL]` on `stderr` (in a human friendly way)
-- (and) we log all messages (worse than a minimal configurable level) in a configurable file in `JSON` (for easy automatic parsing)
+- (and optionally) we log all messages (worse than a minimal configurable level) in a configurable file in `JSON` (for easy automatic parsing)
+- (and optionally) we send all messages (worse than a minimal configurable level) to an UDP syslog server (in JSON or in plain text)
 - we can configure a global minimal level to ignore all messages below
 - we reconfigure automatically python standard logging library to use `mflog`
 - Unicode and Bytes messages are supported (in Python2 and Python3)
-- good support for exceptions (with backtrace)
+- good support for exceptions (with backtraces)
+- override easily minimal levels (for patterns of logger names) programmatically or with plain text configuration files
 
 ## How to use ?
 
@@ -350,6 +352,37 @@ Yes, add `json_only_keys=["key1", "key2"]` to your `set_config()` call or use
 
 You can add `standard_logging_redirect=False` in your `set_config()` call
 of set `MFLOG_STANDARD_LOGGING_REDIRECT=0` environment variable.
+
+## Can I silent a specific noisy logger?
+
+You can use `override_files` feature to do that or you can also use the
+`mflog.add_override` function.
+
+For example:
+
+```python
+import mflog
+
+# for all mylogger.* loggers (fnmatch pattern), the minimal level is CRITICAL
+mflog.add_override("mylogger.*", CRITICAL)
+
+# Not very interesting but this call will be ignored
+mflog.get_logger("mylogger.foo").warning("foo")
+```
+
+## How can I use syslog logging?
+
+You can configure it with these keyword arguments during `set_config()` call:
+
+- `syslog_minimal_level`: `WARNING`, `CRITICAL`...
+- `syslog_address`: `null` (no syslog (defaut)), `127.0.0.1:514` (send packets to 127.0.0.1:514), `/dev/log` (unix socket)...
+- `syslog_format`: `msg_only` (default) or `json`
+
+or with corresponding env vars:
+
+- `MFLOG_SYSLOG_MINIMAL_LEVEL`
+- `MFLOG_SYSLOG_ADDRESS`
+- `MFLOG_SYSLOG_FORMAT`
 
 
 
