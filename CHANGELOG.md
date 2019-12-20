@@ -4,6 +4,8 @@
 ## [Unreleased]
 
 ### New Features
+- add syslog support
+- add a way to silent a noisy logger by its name
 - better error handling if we can't log
 - feat: replace MODULE* environment variables names by MFMODULE* (MODULE_HOME becomes MFMODULE_HOME and so on)
 - allow some non standards logging levels
