@@ -6,6 +6,7 @@ import fnmatch
 import logging
 import fcntl
 import sys
+import six
 import importlib
 
 OVERRIDE_LINES_CACHE = None
@@ -148,15 +149,23 @@ class Config(object):
             if self._json_file == "null":
                 self._json_file = None
         if syslog_address is not None:
-            self._syslog_address = syslog_address
+            tmpsyslog = syslog_address
         else:
-            self._syslog_address = os.environ.get("MFLOG_SYSLOG_ADDRESS", None)
-            if self._syslog_address is None:
+            tmpsyslog = os.environ.get("MFLOG_SYSLOG_ADDRESS", None)
+            if tmpsyslog is None:
                 # metwork mode
-                self._syslog_address = \
+                tmpsyslog = \
                     os.environ.get('%s_LOG_SYSLOG_ADDRESS' % MFMODULE, None)
-            if self._syslog_address == "null":
-                self._syslog_address = None
+            if tmpsyslog == "null":
+                tmpsyslog = None
+        if isinstance(tmpsyslog, six.string_types):
+            tmpsyslog2 = tmpsyslog.split(':')
+            if len(tmpsyslog2) == 1:
+                self._syslog_address = (tmpsyslog2[0], 514)
+            elif len(tmpsyslog2) == 2:
+                self._syslog_address = (tmpsyslog2[0], int(tmpsyslog2[1]))
+            else:
+                raise Exception("wrong syslog_address type: %s" % tmpsyslog)
         if override_files is not None:
             self._override_files = override_files
         else:
