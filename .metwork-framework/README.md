@@ -123,19 +123,6 @@ $ python
 >>> # [...]
 ```
 
-### In a MetWork module
-
-In a MetWork module, if `MFLOG_MINIMAL_LEVEL`, `MFLOG_JSON_MINIMAL_LEVEL` and
-`MFLOG_JSON_FILE` does not exist, there is a failback on:
-
-- ```{MFMODULE}_LOG_MINIMAL_LEVEL```
-- ```{MFMODULE}_LOG_JSON_MINIMAL_LEVEL```
-- ```{MFMODULE}_LOG_JSON_FILE```
-
-For example, `MFSERV_LOG_MINIMAL_LEVEL` force the minimal level inside the
-`MFSERV` module. This particular env var is defined through the standard metwork
-configuration.
-
 ### Note
 
 When you get a `mflog` logger, if default configuration is applied automatically
@@ -175,12 +162,6 @@ or
 # if you want to provide multiple files, use ';' as a separator
 export MFLOG_MINIMAL_LEVEL_OVERRIDE_FILES=/full/path/to/your/override.conf
 ```
-
-In a MetWork context, this is already configured and you can use:
-
-- `{MFMODULE_RUNTIME_HOME}/config/mflog_override.conf`
-- `{MFMODULE_HOME}/config/mflog_override.conf`
-- `{MFEXT_HOME}/config/mflog_override.conf`
 
 ## Link with standard python logging library
 
