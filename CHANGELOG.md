@@ -17,6 +17,7 @@
 
 
 ### Bug Fixes
+- fix a syslog configuration issue with metwork
 - close #11
 - fix latest commit
 - fix some string templating issues in corner cases
