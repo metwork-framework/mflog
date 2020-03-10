@@ -12,15 +12,6 @@ import importlib
 OVERRIDE_LINES_CACHE = None
 LEVEL_FROM_LOGGER_NAME_CACHE = {}
 
-# metwork stuff
-MFEXT_HOME = os.environ.get('MFEXT_HOME', None)
-MFMODULE_HOME = os.environ.get('MFMODULE_HOME',
-                               os.environ.get('MODULE_HOME', None))
-MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME',
-                                       os.environ.get('MODULE_RUNTIME_HOME',
-                                                      None))
-MFMODULE = os.environ.get('MFMODULE', os.environ.get('MODULE', 'UNKNOWN'))
-
 
 def write_with_lock(f, message):
     fcntl.flock(f, fcntl.LOCK_EX)
@@ -99,40 +90,22 @@ class Config(object):
         if minimal_level is not None:
             self._minimal_level = minimal_level
         else:
-            self._minimal_level = os.environ.get('MFLOG_MINIMAL_LEVEL', None)
-            if self._minimal_level is None:
-                # metwork mode
-                self._minimal_level = \
-                    os.environ.get('%s_LOG_MINIMAL_LEVEL' % MFMODULE, 'INFO')
+            self._minimal_level = os.environ.get('MFLOG_MINIMAL_LEVEL', 'INFO')
         if json_minimal_level is not None:
             self._json_minimal_level = json_minimal_level
         else:
             self._json_minimal_level = \
-                os.environ.get('MFLOG_JSON_MINIMAL_LEVEL', None)
-            if self._json_minimal_level is None:
-                # metwork mode
-                self._json_minimal_level = \
-                    os.environ.get('%s_LOG_JSON_MINIMAL_LEVEL' % MFMODULE,
-                                   'WARNING')
+                os.environ.get('MFLOG_JSON_MINIMAL_LEVEL', 'WARNING')
         if syslog_minimal_level is not None:
             self._syslog_minimal_level = syslog_minimal_level
         else:
             self._syslog_minimal_level = \
-                os.environ.get('MFLOG_SYSLOG_MINIMAL_LEVEL', None)
-            if self._syslog_minimal_level is None:
-                # metwork mode
-                self._syslog_minimal_level = \
-                    os.environ.get('%s_LOG_SYSLOG_MINIMAL_LEVEL' % MFMODULE,
-                                   'WARNING')
+                os.environ.get('MFLOG_SYSLOG_MINIMAL_LEVEL', 'WARNING')
         if syslog_format is not None:
             self._syslog_format = syslog_format
         else:
             self._syslog_format = \
-                os.environ.get('MFLOG_SYSLOG_FORMAT', None)
-            if self._syslog_format is None:
-                # metwork mode
-                self._syslog_format = \
-                    os.environ.get('%s_LOG_SYSLOG_FORMAT' % MFMODULE, 'null')
+                os.environ.get('MFLOG_SYSLOG_FORMAT', 'null')
         if self._syslog_format not in ('null', 'msg_only', 'json'):
             raise Exception("unknown syslog format: %s => must be null, "
                             "msg_only or json")
@@ -142,20 +115,12 @@ class Config(object):
             self._json_file = json_file
         else:
             self._json_file = os.environ.get("MFLOG_JSON_FILE", None)
-            if self._json_file is None:
-                # metwork mode
-                self._json_file = os.environ.get('%s_LOG_JSON_FILE' % MFMODULE,
-                                                 None)
             if self._json_file == "null":
                 self._json_file = None
         if syslog_address is not None:
             tmpsyslog = syslog_address
         else:
             tmpsyslog = os.environ.get("MFLOG_SYSLOG_ADDRESS", None)
-            if tmpsyslog is None:
-                # metwork mode
-                tmpsyslog = \
-                    os.environ.get('%s_LOG_SYSLOG_ADDRESS' % MFMODULE, None)
             if tmpsyslog == "null":
                 tmpsyslog = None
         if isinstance(tmpsyslog, six.string_types):
@@ -169,18 +134,9 @@ class Config(object):
         if override_files is not None:
             self._override_files = override_files
         else:
-            if "MFLOG_MINIMAL_LEVEL_OVERRIDE_FILES" in os.environ:
-                self._override_files = \
+            self._override_files = \
                     [x.strip() for x in os.environ.get(
-                        "MFLOG_MINIMAL_LEVEL_OVERRIDE_FILES", None).split(';')]
-            else:
-                # metwork mode
-                self._override_files = []
-                for env in MFMODULE_RUNTIME_HOME, MFMODULE_HOME, MFEXT_HOME:
-                    if env:
-                        self._override_files.append(
-                            "%s/config/mflog_override.conf" % env
-                        )
+                        "MFLOG_MINIMAL_LEVEL_OVERRIDE_FILES", "").split(';')]
         if extra_context_func is not None:
             self._extra_context_func = extra_context_func
         else:
