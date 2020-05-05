@@ -5,3 +5,4 @@ pytest-cov>=2.6.1
 flake8>=3.5.0
 coverage>=4.5.2
 codecov>=2.0.15
+rich
