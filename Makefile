@@ -1,5 +1,5 @@
 .DEFAULT: all
-.PHONY: all develop test coverage
+.PHONY: all develop test coverage codecov
 
 all:
 	echo "nothing here, use one of the following targets:"

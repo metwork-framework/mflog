@@ -7,11 +7,22 @@ with open('requirements.txt') as reqs:
         line for line in reqs.read().split('\n')
         if (line and not line.startswith('--')) and (";" not in line)]
 
+with open(".metwork-framework/README.md") as f:
+    long_description = f.read()
+
 setup(
+    author="Fabien MARTY",
+    author_email="fabien.marty@gmail.com",
     name='mflog',
+    version="0.0.1",
+    license="BSD 3",
+    python_requires='>=2.7',
+    url="https://github.com/metwork-framework/mflog",
+    description="opinionated python (structured) logging library built on structlog",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=find_packages(),
     install_requires=install_requires,
-    url="https://github.com/metwork-framework/mflog",
     entry_points={
         "console_scripts": [
             "log = mflog.log:main",
