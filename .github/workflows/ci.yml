@@ -32,9 +32,11 @@ jobs:
       run: |
         make test
     - name: Coverage
+      if: matrix.python-version == '3.7'
       run: |
         make coverage
     - name: Publish coverage 1
+      if: matrix.python-version == '3.7'
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.PUB_HOST }}
@@ -45,6 +47,7 @@ jobs:
           rm -Rf coverage
           mkdir coverage
     - name: Publish coverage 2
+      if: matrix.python-version == '3.7'
       uses: garygrossgarten/github-action-scp@release
       with:
         local: htmlcov
