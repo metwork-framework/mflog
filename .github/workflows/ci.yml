@@ -21,15 +21,34 @@ jobs:
         pip install -r test-requirements.txt
     - name: Lint with flake8
       run: |
-        pip install flake8
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install
       run: |
-        python setup.py install
+        python setup.py develop
     - name: Test with pytest
       run: |
-        pip install pytest
-        pytest
+        make test
+    - name: Coverage
+      run: |
+        make coverage
+    - name: Publish coverage 1
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.PUB_HOST }}
+        username: ${{ secrets.PUB_USERNAME }}
+        password: ${{ secrets.PUB_PASSWORD }}
+        port: 22
+        script: |
+          rm -Rf coverage
+          mkdir coverage
+    - name: Publish coverage 2
+      uses: garygrossgarten/github-action-scp@release
+      with:
+        local: htmlcov
+        remote: coverage
+        host: ${{ secrets.PUB_HOST }}
+        username: ${{ secrets.PUB_USERNAME }}
+        password: ${{ secrets.PUB_PASSWORD }}
