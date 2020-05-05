@@ -8,6 +8,15 @@ import logging
 import logging.config
 import structlog
 import functools
+import traceback
+import inspect
+try:
+    from rich.console import Console
+    from rich.table import Table
+    from rich.text import Text
+    from rich.tabulate import tabulate_mapping
+except ImportError:
+    pass
 
 from mflog.utils import level_name_to_level_no, Config, \
     get_level_no_from_logger_name, write_with_lock, flush_with_lock, \
@@ -128,16 +137,88 @@ class MFLogLogger(object):
         except Exception as e:
             print("MFLOG ERROR: can't write log message to json output "
                   "with exception: %s" % e, file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
         try:
             self._syslog(**event_dict)
         except Exception as e:
             print("MFLOG ERROR: can't write log message to syslog output "
                   "with exception: %s" % e, file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+        fancy = Config.fancy_output
+        if fancy is None:
+            try:
+                fancy = std_logger._file.isatty()
+            except Exception:
+                fancy = False
+        if fancy:
+            try:
+                self._fancy_msg(std_logger._file, **event_dict)
+            except Exception as e:
+                print("MFLOG ERROR: can't write log message to fancy output "
+                      "with exception: %s" % e, file=sys.stderr)
+                traceback.print_exc(file=sys.stderr)
+        else:
+            try:
+                std_logger.msg(self._format(event_dict))
+            except Exception as e:
+                print("MFLOG ERROR: can't write log message to stdout/err "
+                      "with exception: %s" % e, file=sys.stderr)
+                traceback.print_exc(file=sys.stderr)
+
+    def _fancy_msg(self, f, **event_dict):
+        c = Console(file=f, highlight=False, emoji=False, markup=False)
+        lll = event_dict.pop('level').lower()
+        llu = lll.upper()
+        exc = event_dict.pop('exception', False)
+        event_dict.pop('exception_type', None)
+        event_dict.pop('exception_file', None)
+        name = event_dict.pop('name', 'root')
+        pid = event_dict.pop('pid')
+        ts = event_dict.pop('timestamp')[0:-3] + "Z"
         try:
-            std_logger.msg(self._format(event_dict))
-        except Exception as e:
-            print("MFLOG ERROR: can't write log message to stdout/err "
-                  "with exception: %s" % e, file=sys.stderr)
+            msg = event_dict.pop('event')
+        except KeyError:
+            msg = "None"
+        for key in self._json_only_keys:  # pylint: disable=E1133
+            try:
+                event_dict.pop(key)
+            except KeyError:
+                pass
+        extra = ""
+        if len(event_dict) > 0:
+            extra = kv_renderer(None, None, event_dict)
+        if lll in ['notset', 'debug', 'info', 'warning',
+                   'error', 'critical']:
+            ls = "logging.level.%s" % lll
+        else:
+            ls = "none"
+        output = Table(show_header=False, expand=True, box=None,
+                       padding=(0, 1, 0, 0))
+        output.add_column(style="log.time")
+        output.add_column(width=10, justify="center")
+        output.add_column(justify="center")
+        output.add_column(ratio=1)
+        row = []
+        row.append(Text(ts))
+        row.append(Text("[%s]" % llu, style=ls))
+        row.append(Text(name, style="bold") + Text("#") + Text("%i" % pid,
+                                                               style="yellow"))
+        row.append(Text(msg))
+        output.add_row(*row)
+        if extra != "":
+            output.add_row(
+                "", "", "",
+                Text("{ ", style="repr.attrib_name") +
+                Text(extra, style="repr.attrib_name") +
+                Text(" }", style="repr.attrib_name"))
+        c.print(output)
+        if exc is not None and exc is not False:
+            c.print_exception()
+            dump_locals(f)
+        elif exc is None:
+            # we dump locals when exception() is used outside the context
+            # of an exception
+            dump_locals(f)
 
     def _msg_stdout(self, **event_dict):
         self._msg(self._stdout_print_logger, **event_dict)
@@ -215,7 +296,8 @@ def set_config(minimal_level=None, json_minimal_level=None,
                json_file=None, override_files=None,
                thread_local_context=False, extra_context_func=None,
                json_only_keys=None, standard_logging_redirect=None,
-               override_dict={}, syslog_address=None, syslog_format=None):
+               override_dict={}, syslog_address=None, syslog_format=None,
+               fancy_output=None):
     """Set the logging configuration.
 
     The configuration is cached. So you can call this several times.
@@ -231,7 +313,8 @@ def set_config(minimal_level=None, json_minimal_level=None,
                         json_only_keys=json_only_keys,
                         override_dict=override_dict,
                         syslog_address=syslog_address,
-                        syslog_format=syslog_format)
+                        syslog_format=syslog_format,
+                        fancy_output=fancy_output)
     if standard_logging_redirect is not None:
         slr = standard_logging_redirect
     else:
@@ -337,6 +420,64 @@ def get_logger(logger_name='root'):
     you are sure that the logging config is set.
     """
     return getLogger(logger_name)
+
+
+def debug(message, *args, **kwargs):
+    return get_logger().debug(message, *args, **kwargs)
+
+
+def info(message, *args, **kwargs):
+    return get_logger().info(message, *args, **kwargs)
+
+
+def warning(message, *args, **kwargs):
+    return get_logger().warning(message, *args, **kwargs)
+
+
+def error(message, *args, **kwargs):
+    return get_logger().error(message, *args, **kwargs)
+
+
+def critical(message, *args, **kwargs):
+    return get_logger().critical(message, *args, **kwargs)
+
+
+def exception(message, *args, **kwargs):
+    return get_logger().exception(message, *args, **kwargs)
+
+
+def dump_locals(f=sys.stderr):
+    fancy = Config.fancy_output
+    if fancy is None:
+        try:
+            fancy = f.isatty()
+        except Exception:
+            fancy = False
+    stack_offset = -1
+    try:
+        caller = inspect.stack()[stack_offset]
+        locals_map = {
+            key: value
+            for key, value in caller.frame.f_locals.items()
+            if not key.startswith("__")
+        }
+        if fancy:
+            c = Console(file=f)
+            c.print(tabulate_mapping(locals_map, title="Locals"))
+        else:
+            print("Locals dump", file=f)
+            for k, v in locals_map.items():
+                print("%s: %r" % (k, v))
+    except Exception:
+        get_logger("mflog").warning("can't dump locals")
+
+
+def die(*args, **kwargs):
+    if len(args) == 0:
+        get_logger().exception("die() called", **kwargs)
+    else:
+        get_logger().exception(*args, **kwargs)
+    sys.exit(1)
 
 
 def __unset_configuration():

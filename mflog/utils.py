@@ -83,7 +83,8 @@ class Config(object):
                  thread_local_context=False,
                  extra_context_func=None, json_only_keys=None,
                  override_dict={}, syslog_address=None, syslog_format=None,
-                 syslog_minimal_level=None):
+                 syslog_minimal_level=None,
+                 fancy_output=None):
         global LEVEL_FROM_LOGGER_NAME_CACHE, OVERRIDE_LINES_CACHE
         OVERRIDE_LINES_CACHE = {}
         LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -135,8 +136,8 @@ class Config(object):
             self._override_files = override_files
         else:
             self._override_files = \
-                    [x.strip() for x in os.environ.get(
-                        "MFLOG_MINIMAL_LEVEL_OVERRIDE_FILES", "").split(';')]
+                [x.strip() for x in os.environ.get(
+                    "MFLOG_MINIMAL_LEVEL_OVERRIDE_FILES", "").split(';')]
         if extra_context_func is not None:
             self._extra_context_func = extra_context_func
         else:
@@ -159,6 +160,14 @@ class Config(object):
             else:
                 self._json_only_keys = []
         self._override_dict = override_dict
+        if fancy_output is None:
+            try:
+                from rich.console import Console
+                self._fancy_output = None
+            except ImportError:
+                self._fancy_output = False
+        else:
+            self._fancy_output = fancy_output
 
     @classmethod
     def get_instance(cls):
@@ -209,6 +218,10 @@ class Config(object):
     @classproperty
     def json_only_keys(cls):  # pylint: disable=E0213
         return cls.get_instance()._json_only_keys
+
+    @classproperty
+    def fancy_output(cls):  # pylint: disable=E0213
+        return cls.get_instance()._fancy_output
 
 
 def level_name_to_level_no(level_name):
