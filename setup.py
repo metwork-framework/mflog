@@ -10,15 +10,17 @@ with open('requirements.txt') as reqs:
 with open(".metwork-framework/README.md") as f:
     long_description = f.read()
 
+#Version "dev" will be replaced by CI when releasing
 setup(
     author="Fabien MARTY",
     author_email="fabien.marty@gmail.com",
     name='mflog',
-    version="0.0.1",
+    version="dev",
     license="BSD 3",
     python_requires='>=2.7',
     url="https://github.com/metwork-framework/mflog",
-    description="opinionated python (structured) logging library built on structlog",
+    description="opinionated python (structured) logging library "
+    "built on structlog",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
