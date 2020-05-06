@@ -2,7 +2,7 @@ name: Upload Python Package
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   deploy:
@@ -17,20 +17,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel twine
-    - name: compute tag name
-        id: vars
-        run: |
-          TMPREF=${GITHUB_REF#refs/*/}
-          if [[ "$TMPREF" == */merge ]]; then echo ::set-output name=tag::`echo pr${TMPREF} |awk -F '/' '{print $1;}'`; else echo ::set-output name=tag::${TMPREF}; fi
     - name: update setup.py
       run: |
-        sed setup.py -e 's/version="dev"/version="${{ steps.vars.outputs.tag }}"/' -i
+        TAG=${GITHUB_REF#refs/*/}
+        sed setup.py -e 's/version="dev"/version="${TAG}"/' -i
         cat setup.py | grep version
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        if: startsWith(github.ref, 'refs/tags/z')
+        if: startsWith(github.ref, 'refs/tags/v')
         python setup.py sdist bdist_wheel
         twine upload dist/*
