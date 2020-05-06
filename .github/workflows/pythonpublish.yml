@@ -19,8 +19,10 @@ jobs:
         pip install setuptools wheel twine
     - name: update setup.py
       run: |
+        env | grep GITHUB
         TAG=${GITHUB_REF#refs/*/}
-        sed setup.py -e 's/version="dev"/version="${TAG}"/' -i
+        echo $TAG
+        sed setup.py -e 's/version="dev"/version="$TAG"/' -i
         cat setup.py | grep version
     - name: Build and publish
       env:
