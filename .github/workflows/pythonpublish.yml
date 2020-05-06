@@ -19,16 +19,13 @@ jobs:
         pip install setuptools wheel twine
     - name: update setup.py
       run: |
-        env | grep GITHUB
         TAG=${GITHUB_REF#refs/*/}
-        echo $TAG
         sed setup.py -e "s/version=\"dev\"/version=\"$TAG\"/" -i
-        cat setup.py | grep version
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith($GITHUB_REF, 'refs/tags/v')
         python setup.py sdist bdist_wheel
         twine upload dist/*
