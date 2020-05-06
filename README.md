@@ -9,8 +9,6 @@
 
 [![GitHub CI](https://github.com/metwork-framework/mflog/workflows/CI/badge.svg?branch=master)](https://github.com/metwork-framework/mflog/actions?query=workflow%3ACI&branch=master)
 [![Maintenance](https://github.com/metwork-framework/resources/blob/master/badges/maintained.svg)]()
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/metwork-framework/mflog/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/metwork-framework/mflog/?branch=master)
-[![codecov](https://codecov.io/gh/metwork-framework/mflog/branch/master/graph/badge.svg)](https://codecov.io/gh/metwork-framework/mflog)
 
 
 [//]: # (TABLE_OF_CONTENTS_PLACEHOLDER)
@@ -19,6 +17,8 @@
 
 It is an opinionated python (structured) logging library built on [structlog](https://www.structlog.org/)
 for the [MetWork Framework](http://metwork-framework.org) (but it can be used in any context).
+
+- [Coverage](https://metwork-framework.org/pub/misc/mflog/coverage/)
 
 > Structured logging means that you don’t write hard-to-parse and hard-to-keep-consistent prose in your logs but that you log events that happen in a context instead.
 > - https://www.structlog.org/en/stable/why.html

@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- use github actions
 - remove metwork specific modes
 - add syslog support
 - add a way to silent a noisy logger by its name
