@@ -3,8 +3,6 @@
 It is an opinionated python (structured) logging library built on [structlog](https://www.structlog.org/)
 for the [MetWork Framework](http://metwork-framework.org) (but it can be used in any context).
 
-- [Coverage](https://metwork-framework.org/pub/misc/mflog/coverage/)
-
 > Structured logging means that you don’t write hard-to-parse and hard-to-keep-consistent prose in your logs but that you log events that happen in a context instead.
 > - https://www.structlog.org/en/stable/why.html
 
@@ -350,3 +348,5 @@ or with corresponding env vars:
 - `MFLOG_SYSLOG_MINIMAL_LEVEL`
 - `MFLOG_SYSLOG_ADDRESS`
 - `MFLOG_SYSLOG_FORMAT`
+
+- [Coverage](https://metwork-framework.org/pub/misc/mflog/coverage/)
