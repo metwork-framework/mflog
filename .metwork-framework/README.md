@@ -349,4 +349,5 @@ or with corresponding env vars:
 - `MFLOG_SYSLOG_ADDRESS`
 - `MFLOG_SYSLOG_FORMAT`
 
-- [Coverage](https://metwork-framework.org/pub/misc/mflog/coverage/)
+## Coverage 
+See [Coverage report](https://metwork-framework.org/pub/misc/mflog/coverage/)
