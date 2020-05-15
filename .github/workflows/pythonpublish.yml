@@ -20,7 +20,7 @@ jobs:
     - name: update setup.py
       run: |
         TAG=${GITHUB_REF#refs/*/}
-        sed setup.py -e "s/version=\"dev\"/version=\"$TAG\"/" -i
+        sed setup.py -e "s/version=\"0\.0\.0\"/version=\"$TAG\"/" -i
     - name: Build and publish
       if: startsWith(github.ref, 'refs/tags/v')
       env:
