@@ -15,7 +15,7 @@ setup(
     author="Fabien MARTY",
     author_email="fabien.marty@gmail.com",
     name='mflog',
-    version="dev",
+    version="0.0.0",
     license="BSD 3",
     python_requires='>=2.7',
     url="https://github.com/metwork-framework/mflog",
