@@ -69,7 +69,8 @@ you don't like):
 
 With following demo python program:
 ```python
-{{ "cat demo/demo.py"|shell }}
+cat: demo/demo.py: No such file or directory
+
 ```
 
 You will get this color ouput:
