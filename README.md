@@ -93,7 +93,7 @@ except Exception:
 
 You will get this color ouput:
 
-![color output](./demo/demo.svg)
+![color output](./demo/demo.png)
 
 ## (opinionated) Choices and Features
 
