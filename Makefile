@@ -23,9 +23,9 @@ coverage:
 	pytest --cov=mflog tests/
 
 demo: node_modules/.bin/svgexport
-	termtosvg --screen-geometry=82x37 --template=solarized_dark --still-frames --command "python demo/demo.py" demo/output
+	termtosvg --screen-geometry=100x30 --template=solarized_dark --still-frames --command "python demo/demo.py" demo/output
 	LAST=`ls -rt demo/output/*.svg |tail -1` ; cp -f $${LAST} demo/demo.svg
-	export PATH=.node_modules/bin/svgexport:$${PATH} ; svgexport demo/demo.svg demo/demo.png
+	export PATH="./node_modules/.bin:$${PATH}" ; svgexport demo/demo.svg demo/demo.png
 	optipng demo/demo.png
 	rm -f demo/demo.svg
 
