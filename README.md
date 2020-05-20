@@ -62,7 +62,7 @@ On `json output file`, you will get:
 }
 ```
 
-If the [https://github.com/willmcgugan/rich](python/rich library) is installed (this is not a
+If the [python/rich library](https://github.com/willmcgugan/rich) is installed (this is not a
 mandatory requirement) and if the output is a real terminal (and not a redirection or a pipe),
 the library will automatically configure a fancy color output (of course you can disable it if
 you don't like):
@@ -107,7 +107,7 @@ You will get this color ouput:
 - Unicode and Bytes messages are supported (in Python2 and Python3)
 - good support for exceptions (with backtraces)
 - override easily minimal levels (for patterns of logger names) programmatically or with plain text configuration files
-- if the [https://github.com/willmcgugan/rich](python/rich library) is installed (this is not a mandatory requirement) and if the output is a real terminal (and not a redirection), the library will automatically configure a fancy color output (can be really useful but of course you can disable this feature if you don't like it)
+- if the [python/rich library](https://github.com/willmcgugan/rich) is installed (this is not a mandatory requirement) and if the output is a real terminal (and not a redirection), the library will automatically configure a fancy color output (can be really useful but of course you can disable this feature if you don't like it)
 
 ## How to use ?
 
@@ -424,7 +424,7 @@ or with corresponding env vars:
 
 This feature is automatically enabled when:
 
-- [https://github.com/willmcgugan/rich](python/rich) library is installed
+- [python/rich](https://github.com/willmcgugan/rich) library is installed
 - the corresponding output (stdout, stderr) is a real terminal (and not a redirection to a file)
 
 But you can manually disable it by adding `fancy_output=False` to your `set_config()`.
