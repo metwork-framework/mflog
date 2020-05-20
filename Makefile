@@ -20,5 +20,5 @@ coverage:
 	pytest --cov=mflog tests/
 
 demo:
-	termtosvg --template=solarized_dark --still-frames --command "python demo/demo.py" demo/output
+	termtosvg --screen-geometry=82x37 --template=solarized_dark --still-frames --command "python demo/demo.py" demo/output
 	LAST=`ls -rt demo/output/*.svg |tail -1` ; cp -f $${LAST} demo/demo.svg

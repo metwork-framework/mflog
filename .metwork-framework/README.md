@@ -54,7 +54,7 @@ you don't like):
 
 With following demo python program:
 ```python
-{{ "cat demo/demo.py"|shell }}
+{{ ("cat " + "REPO_HOME"|getenv + "/demo/demo.py")|shell }}
 ```
 
 You will get this color ouput:
