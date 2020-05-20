@@ -9,18 +9,17 @@ import logging.config
 import structlog
 import functools
 import traceback
-import inspect
 try:
     from rich.console import Console
     from rich.table import Table
     from rich.text import Text
-    from rich.tabulate import tabulate_mapping
 except ImportError:
     pass
 
 from mflog.utils import level_name_to_level_no, Config, \
     get_level_no_from_logger_name, write_with_lock, flush_with_lock, \
     __reset_level_from_logger_name_cache
+from mflog.utils import dump_locals as _dump_locals
 from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
     kv_renderer, add_extra_context
 from mflog.unittests import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, \
@@ -169,7 +168,7 @@ class MFLogLogger(object):
         c = Console(file=f, highlight=False, emoji=False, markup=False)
         lll = event_dict.pop('level').lower()
         llu = lll.upper()
-        exc = event_dict.pop('exception', False)
+        exc = event_dict.pop('exception', None)
         event_dict.pop('exception_type', None)
         event_dict.pop('exception_file', None)
         name = event_dict.pop('name', 'root')
@@ -212,13 +211,10 @@ class MFLogLogger(object):
                 Text(extra, style="repr.attrib_name") +
                 Text(" }", style="repr.attrib_name"))
         c.print(output)
-        if exc is not None and exc is not False:
+        if exc is not None:
             c.print_exception()
-            dump_locals(f)
-        elif exc is None:
-            # we dump locals when exception() is used outside the context
-            # of an exception
-            dump_locals(f)
+            if Config.auto_dump_locals:
+                _dump_locals(f)
 
     def _msg_stdout(self, **event_dict):
         self._msg(self._stdout_print_logger, **event_dict)
@@ -292,12 +288,29 @@ class MFLogLoggerFactory(object):
         return MFLogLogger(*args)
 
 
+class MFBoundLogger(structlog.stdlib.BoundLogger):
+
+    def die(self, *args, **kwargs):
+        if len(args) == 0:
+            self.exception("die() called", **kwargs)
+        else:
+            self.exception(*args, **kwargs)
+        if Config.auto_dump_locals:
+            _dump_locals()
+        sys.exit(1)
+
+    def dump_locals(self):
+        res = _dump_locals()
+        if not res:
+            self.warning("can't dump locals")
+
+
 def set_config(minimal_level=None, json_minimal_level=None,
                json_file=None, override_files=None,
                thread_local_context=False, extra_context_func=None,
                json_only_keys=None, standard_logging_redirect=None,
                override_dict={}, syslog_address=None, syslog_format=None,
-               fancy_output=None):
+               fancy_output=None, auto_dump_locals=True):
     """Set the logging configuration.
 
     The configuration is cached. So you can call this several times.
@@ -314,7 +327,8 @@ def set_config(minimal_level=None, json_minimal_level=None,
                         override_dict=override_dict,
                         syslog_address=syslog_address,
                         syslog_format=syslog_format,
-                        fancy_output=fancy_output)
+                        fancy_output=fancy_output,
+                        auto_dump_locals=auto_dump_locals)
     if standard_logging_redirect is not None:
         slr = standard_logging_redirect
     else:
@@ -364,7 +378,7 @@ def set_config(minimal_level=None, json_minimal_level=None,
             lambda _, __, ed: ed
         ],
         cache_logger_on_first_use=True,
-        wrapper_class=structlog.stdlib.BoundLogger,
+        wrapper_class=MFBoundLogger,
         context_class=context_class,
         logger_factory=MFLogLoggerFactory()
     )
@@ -384,6 +398,7 @@ def add_override(logger_name_pattern, minimal_level_name):
         set_config()
     if minimal_level_name is None:
         try:
+            # pylint: disable=unsupported-delete-operation
             del(Config.override_dict[logger_name_pattern])
         except KeyError:
             pass
@@ -392,6 +407,7 @@ def add_override(logger_name_pattern, minimal_level_name):
         # if the minimal_level_name is incorrect
         level_name_to_level_no(minimal_level_name)
         d = Config.override_dict
+        # pylint: disable=unsupported-assignment-operation
         d[logger_name_pattern] = minimal_level_name
     __reset_level_from_logger_name_cache()
 
@@ -446,38 +462,12 @@ def exception(message, *args, **kwargs):
     return get_logger().exception(message, *args, **kwargs)
 
 
-def dump_locals(f=sys.stderr):
-    fancy = Config.fancy_output
-    if fancy is None:
-        try:
-            fancy = f.isatty()
-        except Exception:
-            fancy = False
-    stack_offset = -1
-    try:
-        caller = inspect.stack()[stack_offset]
-        locals_map = {
-            key: value
-            for key, value in caller.frame.f_locals.items()
-            if not key.startswith("__")
-        }
-        if fancy:
-            c = Console(file=f)
-            c.print(tabulate_mapping(locals_map, title="Locals"))
-        else:
-            print("Locals dump", file=f)
-            for k, v in locals_map.items():
-                print("%s: %r" % (k, v))
-    except Exception:
-        get_logger("mflog").warning("can't dump locals")
-
-
 def die(*args, **kwargs):
-    if len(args) == 0:
-        get_logger().exception("die() called", **kwargs)
-    else:
-        get_logger().exception(*args, **kwargs)
-    sys.exit(1)
+    get_logger().die(*args, **kwargs)
+
+
+def dump_locals(f=sys.stderr):
+    get_logger().dump_locals(f=f)
 
 
 def __unset_configuration():
