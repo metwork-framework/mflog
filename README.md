@@ -62,6 +62,20 @@ On `json output file`, you will get:
 }
 ```
 
+If the [https://github.com/willmcgugan/rich](python/rich library) is installed (this is not a
+mandatory requirement) and if the output is a real terminal (and not a redirection or a pipe),
+the library will automatically configure a fancy color output (of course you can disable it if
+you don't like):
+
+With following demo python program:
+```python
+{{ "cat demo/demo.py"|shell }}
+```
+
+You will get this color ouput:
+
+![color output](./demo/demo.svg)
+
 ## (opinionated) Choices and Features
 
 - we use main ideas from `structlog` library
@@ -74,6 +88,7 @@ On `json output file`, you will get:
 - Unicode and Bytes messages are supported (in Python2 and Python3)
 - good support for exceptions (with backtraces)
 - override easily minimal levels (for patterns of logger names) programmatically or with plain text configuration files
+- if the [https://github.com/willmcgugan/rich](python/rich library) is installed (this is not a mandatory requirement) and if the output is a real terminal (and not a redirection), the library will automatically configure a fancy color output (can be really useful but of course you can disable this feature if you don't like it)
 
 ## How to use ?
 
@@ -271,6 +286,28 @@ It raises `KeyError` if the key is not part of the context.
 
 Like `.unbind` but best effort:  missing keys are ignored.
 
+### `.die(optional_message, *args, **kwargs)`
+
+Same as `.exception()` but also do a `.dump_locals()` call and exit the program
+with `sys.exit(1)`.
+
+### `.dump_locals()`
+
+Dump locals variables on `stderr` (for debugging).
+
+### `mflog.*`
+
+All previous loggers method are also available in `mflog` module.
+
+Example:
+
+```python
+
+import mflog
+
+mflog.warning("this is a warning message", context1="foobar", user_id=123)
+```
+
 ## FAQ
 
 ## If I want to use mflog inside my library ?
@@ -364,7 +401,17 @@ or with corresponding env vars:
 - `MFLOG_SYSLOG_ADDRESS`
 - `MFLOG_SYSLOG_FORMAT`
 
-## Coverage 
+## How to disable the fancy color output?
+
+This feature is automatically enabled when:
+
+- [https://github.com/willmcgugan/rich](python/rich) library is installed
+- the corresponding output (stdout, stderr) is a real terminal (and not a redirection to a file)
+
+But you can manually disable it by adding `fancy_output=False` to your `set_config()`.
+
+## Coverage
+
 See [Coverage report](https://metwork-framework.org/pub/misc/mflog/coverage/)
 
 
