@@ -377,13 +377,18 @@ def get_level_no_from_logger_name(logger_name):
     return LEVEL_FROM_LOGGER_NAME_CACHE[logger_name]
 
 
-def dump_locals(f=sys.stderr):
+def get_resolved_fancy_output_config_value(f=sys.stderr):
     fancy = Config.fancy_output
     if fancy is None:
         try:
             fancy = f.isatty()
         except Exception:
             fancy = False
+    return fancy
+
+
+def dump_locals(f=sys.stderr):
+    fancy = get_resolved_fancy_output_config_value(f=f)
     stack_offset = -1
     try:
         caller = inspect.stack()[stack_offset]
@@ -392,8 +397,12 @@ def dump_locals(f=sys.stderr):
             for key, value in caller.frame.f_locals.items()
             if not key.startswith("__")
         }
+        for k, v in locals_map.items():
+            if len(repr(v)) > 10000:
+                locals_map[k] = \
+                    "(too big value => hidden in this variables dump)"
         if fancy:
-            c = Console(file=f)
+            c = Console(file=sys.stderr)
             c.print(tabulate_mapping(locals_map, title="Locals"))
         else:
             print("Locals dump", file=f)

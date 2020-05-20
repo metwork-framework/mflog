@@ -18,7 +18,8 @@ except ImportError:
 
 from mflog.utils import level_name_to_level_no, Config, \
     get_level_no_from_logger_name, write_with_lock, flush_with_lock, \
-    __reset_level_from_logger_name_cache
+    __reset_level_from_logger_name_cache, \
+    get_resolved_fancy_output_config_value
 from mflog.utils import dump_locals as _dump_locals
 from mflog.processors import fltr, add_level, add_pid, add_exception_info, \
     kv_renderer, add_extra_context
@@ -78,17 +79,14 @@ class StructlogHandler(logging.Handler):
 
 class MFLogLogger(object):
 
-    _stdout_print_logger = None
-    _stderr_print_logger = None
-    _syslog_logger = None
-    _json_file = None
     _unittests_stdout = None
     _unittests_stderr = None
     _unittests_json = None
-    _json_only_keys = None
-    name = None
 
     def __init__(self, *args):
+        self._json_file = None
+        self._json_logger = None
+        self._syslog_logger = None
         if len(args) > 0:
             self.name = args[0]
         else:
@@ -143,12 +141,7 @@ class MFLogLogger(object):
             print("MFLOG ERROR: can't write log message to syslog output "
                   "with exception: %s" % e, file=sys.stderr)
             traceback.print_exc(file=sys.stderr)
-        fancy = Config.fancy_output
-        if fancy is None:
-            try:
-                fancy = std_logger._file.isatty()
-            except Exception:
-                fancy = False
+        fancy = get_resolved_fancy_output_config_value(f=std_logger._file)
         if fancy:
             try:
                 self._fancy_msg(std_logger._file, **event_dict)
