@@ -8,6 +8,12 @@ import fcntl
 import sys
 import six
 import importlib
+import inspect
+try:
+    from rich.console import Console
+    from rich.tabulate import tabulate_mapping
+except ImportError:
+    pass
 
 OVERRIDE_LINES_CACHE = None
 LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -77,6 +83,8 @@ class Config(object):
     _syslog_address = None
     _syslog_format = None
     _syslog_minimal_level = None
+    _fancy_output = None
+    _auto_dump_locals = True
 
     def __init__(self, minimal_level=None, json_minimal_level=None,
                  json_file=None, override_files=None,
@@ -84,7 +92,8 @@ class Config(object):
                  extra_context_func=None, json_only_keys=None,
                  override_dict={}, syslog_address=None, syslog_format=None,
                  syslog_minimal_level=None,
-                 fancy_output=None):
+                 fancy_output=None,
+                 auto_dump_locals=True):
         global LEVEL_FROM_LOGGER_NAME_CACHE, OVERRIDE_LINES_CACHE
         OVERRIDE_LINES_CACHE = {}
         LEVEL_FROM_LOGGER_NAME_CACHE = {}
@@ -161,13 +170,13 @@ class Config(object):
                 self._json_only_keys = []
         self._override_dict = override_dict
         if fancy_output is None:
-            try:
-                from rich.console import Console
+            if 'rich' in sys.modules:
                 self._fancy_output = None
-            except ImportError:
+            else:
                 self._fancy_output = False
         else:
             self._fancy_output = fancy_output
+        self._auto_dump_locals = auto_dump_locals
 
     @classmethod
     def get_instance(cls):
@@ -182,6 +191,10 @@ class Config(object):
     @classproperty
     def minimal_level(cls):  # pylint: disable=E0213
         return cls.get_instance()._minimal_level
+
+    @classproperty
+    def auto_dump_locals(cls):  # pylint: disable=E0213
+        return cls.get_instance()._auto_dump_locals
 
     @classproperty
     def extra_context_func(cls):  # pylint: disable=E0213
@@ -341,6 +354,7 @@ def get_level_no_from_logger_name(logger_name):
         pass
 
     if logger_name not in LEVEL_FROM_LOGGER_NAME_CACHE:
+        # pylint: disable=no-member
         for k, v in Config.override_dict.items():
             if fnmatch.fnmatch(logger_name, k):
                 LEVEL_FROM_LOGGER_NAME_CACHE[logger_name] = \
@@ -361,3 +375,30 @@ def get_level_no_from_logger_name(logger_name):
             LEVEL_FROM_LOGGER_NAME_CACHE[logger_name] = \
                 level_name_to_level_no(Config.minimal_level)
     return LEVEL_FROM_LOGGER_NAME_CACHE[logger_name]
+
+
+def dump_locals(f=sys.stderr):
+    fancy = Config.fancy_output
+    if fancy is None:
+        try:
+            fancy = f.isatty()
+        except Exception:
+            fancy = False
+    stack_offset = -1
+    try:
+        caller = inspect.stack()[stack_offset]
+        locals_map = {
+            key: value
+            for key, value in caller.frame.f_locals.items()
+            if not key.startswith("__")
+        }
+        if fancy:
+            c = Console(file=f)
+            c.print(tabulate_mapping(locals_map, title="Locals"))
+        else:
+            print("Locals dump", file=f)
+            for k, v in locals_map.items():
+                print("%s: %r" % (k, v))
+    except Exception:
+        return False
+    return True
