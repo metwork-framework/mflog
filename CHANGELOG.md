@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## [Unreleased]
+
+### New Features
+- add fancy_output option (with rich library)
+
+
+
+
+
 
 ## v0.0.2 (2020-05-06)
 
