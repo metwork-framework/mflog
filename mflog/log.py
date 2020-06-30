@@ -5,12 +5,12 @@ from mflog import get_logger
 
 
 def main():
-    parser = argparse.ArgumentParser("log a message with standard metwork"
+    parser = argparse.ArgumentParser("log a message with standard metwork "
                                      "logging system")
     parser.add_argument('--application-name', '-a', action="store",
                         default="default", help="application name")
     parser.add_argument('LEVEL', action='store',
-                        help="Niveau de log",
+                        help="Log level",
                         choices=['ERROR', 'CRITICAL', 'WARNING', 'INFO',
                                  'DEBUG'])
     parser.add_argument('MESSAGE', action='store', help="message to log")
