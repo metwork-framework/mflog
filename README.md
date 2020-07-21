@@ -13,6 +13,8 @@
 
 [//]: # (TABLE_OF_CONTENTS_PLACEHOLDER)
 
+
+
 ## What is it ?
 
 It is an opinionated python (structured) logging library built on [structlog](https://www.structlog.org/)
