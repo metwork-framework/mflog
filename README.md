@@ -1,17 +1,14 @@
 # mflog
 
-[//]: # (automatically generated from https://github.com/metwork-framework/resources/blob/master/cookiecutter/_%7B%7Bcookiecutter.repo%7D%7D/README.md)
+[//]: # (automatically generated from https://github.com/metwork-framework/github_organization_management/blob/master/common_files/README.md)
 
 **Status (master branch)**
-
 
 
 
 [![GitHub CI](https://github.com/metwork-framework/mflog/workflows/CI/badge.svg?branch=master)](https://github.com/metwork-framework/mflog/actions?query=workflow%3ACI&branch=master)
 [![Maintenance](https://github.com/metwork-framework/resources/blob/master/badges/maintained.svg)]()
 
-
-[//]: # (TABLE_OF_CONTENTS_PLACEHOLDER)
 
 
 
@@ -434,11 +431,6 @@ But you can manually disable it by adding `fancy_output=False` to your `set_conf
 ## Coverage
 
 See [Coverage report](https://metwork-framework.org/pub/misc/mflog/coverage/)
-
-
-
-
-
 
 
 
