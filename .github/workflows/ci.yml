@@ -48,14 +48,14 @@ jobs:
         password: ${{ secrets.PUB_PASSWORD }}
         port: 22
         script: |
-          rm -Rf coverage
-          mkdir coverage
+          rm -Rf /pub/misc/mflog/coverage 2>/dev/null
+          mkdir -p /pub/misc/mflog/coverage
     - name: Publish coverage 2
       if: matrix.python-version == '3.7'
       uses: garygrossgarten/github-action-scp@release
       with:
         local: htmlcov
-        remote: coverage
+        remote: /pub/misc/mflog/coverage
         host: ${{ secrets.PUB_HOST }}
         username: ${{ secrets.PUB_USERNAME }}
         password: ${{ secrets.PUB_PASSWORD }}
