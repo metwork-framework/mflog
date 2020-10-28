@@ -131,8 +131,8 @@ try:
 except Exception:
     x.exception("we catched an exception with automatic traceback")
 
-x = log.bind(context1="foo")
-x = log.bind(context2="bar")
+x = x.bind(context1="foo")
+x = x.bind(context2="bar")
 x.info("this is a contexted message", extra_var=123)
 ```
 
@@ -201,7 +201,7 @@ Then, you can use
 
 # yes we use a list here because you can use several files
 # (the first match wins)
-mflog.configure([...], override_files=["/full/path/to/your/override.conf"])
+mflog.set_config([...], override_files=["/full/path/to/your/override.conf"])
 ```
 
 or
