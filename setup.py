@@ -7,7 +7,7 @@ with open('requirements.txt') as reqs:
         line for line in reqs.read().split('\n')
         if (line and not line.startswith('--')) and (";" not in line)]
 
-with open(".metwork-framework/README.md") as f:
+with open("README.md") as f:
     long_description = f.read()
 
 #Version "0.0.0" will be replaced by CI when releasing
