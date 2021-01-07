@@ -1,1 +1,2 @@
 structlog>=19.1.0
+six
