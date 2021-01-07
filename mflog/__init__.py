@@ -145,17 +145,17 @@ class MFLogLogger(object):
         if fancy:
             try:
                 self._fancy_msg(std_logger._file, **event_dict)
-            except Exception as e:
-                print("MFLOG ERROR: can't write log message to fancy output "
-                      "with exception: %s" % e, file=sys.stderr)
-                traceback.print_exc(file=sys.stderr)
-        else:
-            try:
-                std_logger.msg(self._format(event_dict))
-            except Exception as e:
-                print("MFLOG ERROR: can't write log message to stdout/err "
-                      "with exception: %s" % e, file=sys.stderr)
-                traceback.print_exc(file=sys.stderr)
+                return
+            except Exception:
+                # can't write to fancy output, let's fallback silently to
+                # standard logging
+                pass
+        try:
+            std_logger.msg(self._format(event_dict))
+        except Exception as e:
+            print("MFLOG ERROR: can't write log message to stdout/err "
+                  "with exception: %s" % e, file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
 
     def _fancy_msg(self, f, **event_dict):
         c = Console(file=f, highlight=False, emoji=False, markup=False)
