@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v0.1.0 (2021-01-07)
+
+### Bug Fixes
+
+- fix a stopping issue with fancy output in some corner cases
+- add a dependency on six
+
 ## v0.0.4 (2020-11-16)
 
 - No interesting change
