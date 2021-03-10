@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '2.7', '3.7' ]
+        python-version: [ '2.7', '3.7', '3.8' ]
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
@@ -22,6 +22,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        # pytest-runner 5.2 must be pre-installed for python 2.7 build
+        # because it is a build dependency and pytest-runner 5.3 is not python2 compliant
+        pip install -r pre-requirements.txt
         pip install -r test-requirements.txt
     - name: Lint with flake8
       run: |
