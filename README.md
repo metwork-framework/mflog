@@ -4,9 +4,7 @@
 
 **Status (master branch)**
 
-
-
-[![GitHub CI](https://github.com/metwork-framework/mflog/workflows/CI/badge.svg?branch=master)](https://github.com/metwork-framework/mflog/actions?query=workflow%3ACI+branch%3Amaster)
+[![GitHub CI](https://github.com/metwork-framework/mflog/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/metwork-framework/mflog/actions?query=workflow%3ACI+branch%3Amaster)
 [![Maintenance](https://raw.githubusercontent.com/metwork-framework/resources/master/badges/maintained.svg)](https://github.com/metwork-framework/resources/blob/master/badges/maintained.svg)
 
 
