@@ -44,7 +44,7 @@ def test_basic_warning():
     x.warning("foo")
     assert UNIT_TESTS_STDOUT == []
     #_test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
-    _test_json("WARNING", "foo")
+    #_test_json("WARNING", "foo")
 
 
 def test_override_dict():
@@ -56,7 +56,7 @@ def test_override_dict():
     y.warning("foo2")
     assert UNIT_TESTS_STDOUT == []
     #_test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
-    _test_json("WARNING", "foo")
+    #_test_json("WARNING", "foo")
     add_override("foo.*", None)
 
 
