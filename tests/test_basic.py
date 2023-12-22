@@ -55,8 +55,8 @@ def test_override_dict():
     x.warning("foo")
     y.warning("foo2")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
-    #_test_json("WARNING", "foo")
+    # _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
+    # _test_json("WARNING", "foo")
     add_override("foo.*", None)
 
 
@@ -65,8 +65,8 @@ def test_basic_log():
     x = get_logger()
     x.log(logging.WARNING, "foo")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
-    #_test_json("WARNING", "foo")
+    # _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
+    # _test_json("WARNING", "foo")
 
 
 def test_basic_debug():
@@ -84,7 +84,7 @@ def test_basic_info():
     x.info("foo")
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
 
 
 def test_logger_name():
@@ -93,7 +93,7 @@ def test_logger_name():
     x.info("test")
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "test")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "test")
     assert "foo.bar" in UNIT_TESTS_STDOUT[0]
 
 
@@ -102,8 +102,8 @@ def test_basic_critical():
     x = get_logger()
     x.critical("foo")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "CRITICAL", "foo")
-    #_test_json("CRITICAL", "foo")
+    # _test_stdxxx(UNIT_TESTS_STDERR, "CRITICAL", "foo")
+    # _test_json("CRITICAL", "foo")
 
 
 def test_basic_error():
@@ -111,8 +111,8 @@ def test_basic_error():
     x = get_logger()
     x.error("foo")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "foo")
-    #_test_json("ERROR", "foo")
+    # _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "foo")
+    # _test_json("ERROR", "foo")
 
 
 def test_basic_exception():
@@ -123,11 +123,11 @@ def test_basic_exception():
     except Exception:
         x.exception("foo")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "foo")
-    #tmp = _test_json("ERROR", "foo")
-    #assert len(tmp['exception']) > 10
-    #assert tmp['exception_type'] == 'ZeroDivisionError'
-    #assert tmp['exception_file'] == __file__
+    # _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "foo")
+    # tmp = _test_json("ERROR", "foo")
+    # assert len(tmp['exception']) > 10
+    # assert tmp['exception_type'] == 'ZeroDivisionError'
+    # assert tmp['exception_file'] == __file__
 
 
 def test_issue3():
@@ -138,16 +138,16 @@ def test_issue3():
     except Exception as e:
         x.exception(e)
     assert UNIT_TESTS_STDOUT == []
-    if six.PY2:
-        #_test_stdxxx(UNIT_TESTS_STDERR, "ERROR",
-        #             "integer division or modulo by zero")
-        #tmp = _test_json("ERROR", "integer division or modulo by zero")
-    else:
-        #_test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "division by zero")
-        #tmp = _test_json("ERROR", "division by zero")
-    #assert len(tmp['exception']) > 10
-    #assert tmp['exception_type'] == 'ZeroDivisionError'
-    #assert tmp['exception_file'] == __file__
+    # if six.PY2:
+        # _test_stdxxx(UNIT_TESTS_STDERR, "ERROR",
+        #              "integer division or modulo by zero")
+        # tmp = _test_json("ERROR", "integer division or modulo by zero")
+    # else:
+        # _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "division by zero")
+        # tmp = _test_json("ERROR", "division by zero")
+    # assert len(tmp['exception']) > 10
+    # assert tmp['exception_type'] == 'ZeroDivisionError'
+    # assert tmp['exception_file'] == __file__
 
 
 def test_template_info():
@@ -156,7 +156,7 @@ def test_template_info():
     x.info("foo%s", "bar")
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foobar")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foobar")
 
 
 def test_template_info2():
@@ -165,7 +165,7 @@ def test_template_info2():
     x.info("foo%(u)s", {"u": "bar"})
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foobar")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foobar")
 
 
 def test_kv_warning():
@@ -173,10 +173,10 @@ def test_kv_warning():
     x = get_logger()
     x.warning("foo", k1=1, k2="bar")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
-    #tmp = _test_json("WARNING", "foo")
-    #assert tmp['k1'] == 1
-    #assert tmp['k2'] == 'bar'
+    # _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
+    # tmp = _test_json("WARNING", "foo")
+    # assert tmp['k1'] == 1
+    # assert tmp['k2'] == 'bar'
 
 
 def test_utf8():
@@ -184,10 +184,10 @@ def test_utf8():
     x = get_logger()
     x.warning(u"fooééé", k1=1, k2=u"barààà")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "WARNING", u"fooééé", u"{k1=1 k2=barààà}")
-    #tmp = _test_json("WARNING", u"fooééé")
-    #assert tmp['k1'] == 1
-    #assert tmp['k2'] == u'barààà'
+    # _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", u"fooééé", u"{k1=1 k2=barààà}")
+    # tmp = _test_json("WARNING", u"fooééé")
+    # assert tmp['k1'] == 1
+    # assert tmp['k2'] == u'barààà'
 
 
 @pytest.mark.skipif(sys.version_info < (3, 0), reason="requires python3")
@@ -196,10 +196,10 @@ def test_bytes():
     x = get_logger()
     x.warning(b"foo", k1=1, k2=b"bar")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
-    #tmp = _test_json("WARNING", "foo")
-    #assert tmp['k1'] == 1
-    #assert tmp['k2'] == 'bar'
+    # _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
+    # tmp = _test_json("WARNING", "foo")
+    # assert tmp['k1'] == 1
+    # assert tmp['k2'] == 'bar'
 
 
 def test_bind():
@@ -209,10 +209,10 @@ def test_bind():
     x = x.bind(k2='bar')
     x.warning("foo")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
-    #tmp = _test_json("WARNING", "foo")
-    #assert tmp['k1'] == 1
-    #assert tmp['k2'] == 'bar'
+    # _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo", "{k1=1 k2=bar}")
+    # tmp = _test_json("WARNING", "foo")
+    # assert tmp['k1'] == 1
+    # assert tmp['k2'] == 'bar'
 
 
 def test_logging1():
@@ -220,8 +220,8 @@ def test_logging1():
     x = logging.getLogger("foo.bar")
     x.warning("foo%s", "bar")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foobar")
-    #_test_json("WARNING", "foobar")
+    # _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foobar")
+    # _test_json("WARNING", "foobar")
 
 
 def test_logging2():
@@ -230,7 +230,7 @@ def test_logging2():
     x.info("foo")
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo")
 
 
 def test_logging3():
@@ -239,7 +239,7 @@ def test_logging3():
     x.info("foo %s", "bar")
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo bar")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo bar")
 
 
 def test_logging4():
@@ -248,7 +248,7 @@ def test_logging4():
     x.info("foo %(u)s", {"u": "bar"})
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo bar")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo bar")
 
 
 def test_logging5():
@@ -267,7 +267,7 @@ def test_empty_call1():
     x.info()
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "None")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "None")
 
 
 def test_empty_call2():
@@ -276,7 +276,7 @@ def test_empty_call2():
     x.info(None)
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "None")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "None")
 
 
 def test_extra_context():
@@ -287,9 +287,9 @@ def test_extra_context():
     x.info("foo", k1=2, k3=2)
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo",
-    #             "{extra_context_key1=extra_context_value1 "
-    #             "extra_context_key2=extra_context_value2 k1=2 k2=bar k3=2}")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo",
+    #              "{extra_context_key1=extra_context_value1 "
+    #              "extra_context_key2=extra_context_value2 k1=2 k2=bar k3=2}")
 
 
 def test_extra_context2():
@@ -300,9 +300,9 @@ def test_extra_context2():
     x.info("foo", k1=2, k3=2)
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo",
-    #             "{extra_context_key1=extra_context_value1 "
-    #             "extra_context_key2=extra_context_value2 k1=2 k2=bar k3=2}")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo",
+    #              "{extra_context_key1=extra_context_value1 "
+    #              "extra_context_key2=extra_context_value2 k1=2 k2=bar k3=2}")
 
 
 def test_json_only_keys1():
@@ -313,7 +313,7 @@ def test_json_only_keys1():
     x.info("foo", k1=2, k3=2)
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
 
 
 def test_json_only_keys2():
@@ -325,7 +325,7 @@ def test_json_only_keys2():
     x.info("foo", k1=2, k3=2)
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
-    #_test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
+    # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "foo", "{k1=2 k2=bar k3=2}")
 
 
 def test_is_enabled_for():
