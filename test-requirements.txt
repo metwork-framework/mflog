@@ -6,3 +6,4 @@ flake8>=3.5.0
 coverage>=4.5.2
 rich; python_version >= '3.6'
 termtosvg
+setuptools; python_version > '3.11'
