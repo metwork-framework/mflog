@@ -40,23 +40,19 @@ jobs:
       if: matrix.python-version == '3.7'
       run: |
         make coverage
-    - name: Publish coverage 1
+    - name: Publish coverage
       if: matrix.python-version == '3.7'
-      uses: appleboy/ssh-action@master
+      uses: thebaptiste/ssh-scp-ssh-pipelines@metwork
+      env:
+        LOCAL: htmlcov
+        REMOTE: /pub/misc/mflog/coverage
       with:
         host: ${{ secrets.PUB_HOST }}
-        username: ${{ secrets.PUB_USERNAME }}
-        password: ${{ secrets.PUB_PASSWORD }}
+        user: ${{ secrets.PUB_USERNAME }}
+        pass: ${{ secrets.PUB_PASSWORD }}
         port: 22
-        script: |
-          rm -Rf /pub/misc/mflog/coverage 2>/dev/null
-          mkdir -p /pub/misc/mflog/coverage
-    - name: Publish coverage 2
-      if: matrix.python-version == '3.7'
-      uses: garygrossgarten/github-action-scp@release
-      with:
-        local: htmlcov
-        remote: /pub/misc/mflog/coverage
-        host: ${{ secrets.PUB_HOST }}
-        username: ${{ secrets.PUB_USERNAME }}
-        password: ${{ secrets.PUB_PASSWORD }}
+        first_ssh: |
+          rm -Rf ${REMOTE} 2>/dev/null
+          mkdir -p ${REMOTE}
+        scp: |
+            '${LOCAL}/*' => ${REMOTE}
