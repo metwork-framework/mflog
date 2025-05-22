@@ -306,7 +306,6 @@ def _get_override_lines(path):
         (list of couples) A list of (logger name pattern, level name).
 
     """
-    global OVERRIDE_LINES_CACHE
     if path not in OVERRIDE_LINES_CACHE:
         lines = _file_to_lines(path)
         OVERRIDE_LINES_CACHE[path] = lines
@@ -348,7 +347,6 @@ def get_level_no_from_logger_name(logger_name):
         (int) The level number to use for this logger name.
 
     """
-    global LEVEL_FROM_LOGGER_NAME_CACHE
 
     class Found(Exception):
         pass
