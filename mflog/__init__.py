@@ -392,7 +392,7 @@ def add_override(logger_name_pattern, minimal_level_name):
     if minimal_level_name is None:
         try:
             # pylint: disable=unsupported-delete-operation
-            del(Config.override_dict[logger_name_pattern])
+            del (Config.override_dict[logger_name_pattern])
         except KeyError:
             pass
     else:

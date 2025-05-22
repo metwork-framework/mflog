@@ -9,7 +9,6 @@ from mflog import get_logger, set_config, add_override
 from mflog import UNIT_TESTS_STDOUT, UNIT_TESTS_STDERR, UNIT_TESTS_JSON
 from mflog.unittests import reset_unittests, extra_context
 import logging
-import six
 
 
 def _test_stdxxx(stdxxx, level, msg, extra=None):
@@ -43,8 +42,8 @@ def test_basic_warning():
     x = get_logger()
     x.warning("foo")
     assert UNIT_TESTS_STDOUT == []
-    #_test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
-    #_test_json("WARNING", "foo")
+    # _test_stdxxx(UNIT_TESTS_STDERR, "WARNING", "foo")
+    # _test_json("WARNING", "foo")
 
 
 def test_override_dict():
@@ -94,7 +93,7 @@ def test_logger_name():
     assert UNIT_TESTS_STDERR == []
     assert UNIT_TESTS_JSON == []
     # _test_stdxxx(UNIT_TESTS_STDOUT, "INFO", "test")
-    #assert "foo.bar" in UNIT_TESTS_STDOUT[0]
+    # assert "foo.bar" in UNIT_TESTS_STDOUT[0]
 
 
 def test_basic_critical():
@@ -139,12 +138,12 @@ def test_issue3():
         x.exception(e)
     assert UNIT_TESTS_STDOUT == []
     # if six.PY2:
-        # _test_stdxxx(UNIT_TESTS_STDERR, "ERROR",
-        #              "integer division or modulo by zero")
-        # tmp = _test_json("ERROR", "integer division or modulo by zero")
+    #     _test_stdxxx(UNIT_TESTS_STDERR, "ERROR",
+    #                  "integer division or modulo by zero")
+    #     tmp = _test_json("ERROR", "integer division or modulo by zero")
     # else:
-        # _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "division by zero")
-        # tmp = _test_json("ERROR", "division by zero")
+    #     _test_stdxxx(UNIT_TESTS_STDERR, "ERROR", "division by zero")
+    #     tmp = _test_json("ERROR", "division by zero")
     # assert len(tmp['exception']) > 10
     # assert tmp['exception_type'] == 'ZeroDivisionError'
     # assert tmp['exception_file'] == __file__

@@ -10,7 +10,7 @@ with open('requirements.txt') as reqs:
 with open("README.md") as f:
     long_description = f.read()
 
-#Version "0.0.0" will be replaced by CI when releasing
+# Version "0.0.0" will be replaced by CI when releasing
 setup(
     author="Fabien MARTY",
     author_email="fabien.marty@gmail.com",

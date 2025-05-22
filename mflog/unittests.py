@@ -11,15 +11,15 @@ UNIT_TESTS_JSON = []
 
 def reset_unittests():
     """Reset unittests."""
-    del(UNIT_TESTS_STDOUT[:])
-    del(UNIT_TESTS_STDERR[:])
-    del(UNIT_TESTS_JSON[:])
+    del (UNIT_TESTS_STDOUT[:])
+    del (UNIT_TESTS_STDERR[:])
+    del (UNIT_TESTS_JSON[:])
     try:
-        del(os.environ["MFLOG_EXTRA_CONTEXT_FUNC"])
+        del (os.environ["MFLOG_EXTRA_CONTEXT_FUNC"])
     except Exception:
         pass
     try:
-        del(os.environ["MFLOG_JSON_ONLY_KEYS"])
+        del (os.environ["MFLOG_JSON_ONLY_KEYS"])
     except Exception:
         pass
     mflog.__unset_configuration()
