@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### Bug Fixes
+
+- fix flake8 error F824
+
 ## v0.1.0 (2021-01-07)
 
 ### Bug Fixes
